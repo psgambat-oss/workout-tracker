@@ -35,7 +35,7 @@
     /* ── HEADER ── */
     .app-header {
       background: var(--card);
-      padding: 54px 16px 14px;
+      padding: 20px 16px 14px;
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
@@ -60,7 +60,7 @@
 
     .day-tab {
       flex: 1;
-      padding: 7px 4px;
+      padding: 4px 4px;
       border: none;
       border-radius: 8px;
       background: var(--card2);
@@ -71,8 +71,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
-      min-height: 54px;
+      gap: 2px;
+      min-height: 44px;
       justify-content: center;
     }
 
@@ -83,6 +83,9 @@
     .day-tab.active          { background: var(--accent); color: #fff; }
     .day-tab.has-progress .day-dot { background: var(--green); }
     .day-tab.active .day-dot { background: rgba(255,255,255,0.5); }
+    .day-tab.weekend         { background: #1a1a1a; color: #555; border: 1px solid #2a2a2a; }
+    .day-tab.weekend.active  { background: var(--accent); color: #fff; border-color: transparent; }
+    .day-tab.weekend.has-progress .day-dot { background: var(--green); }
 
     /* ── WORKOUT META ── */
     .workout-meta {
@@ -95,10 +98,10 @@
     .workout-type  { font-size: 17px; font-weight: 800; letter-spacing: 0.3px; }
     .workout-days  { font-size: 11px; color: var(--dim); font-weight: 600; letter-spacing: 1px; }
 
-    .expand-btns { display: flex; gap: 6px; margin-top: 8px; }
+    .expand-btns { display: flex; gap: 6px; margin-top: 6px; }
     .expand-btn {
       flex: 1;
-      padding: 7px;
+      padding: 4px;
       border: none;
       border-radius: 8px;
       background: var(--card2);
@@ -131,13 +134,13 @@
     }
 
     /* ── SECTIONS ── */
-    .section { margin: 10px 12px 0; }
+    .section { margin: 6px 12px 0; }
 
     .section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 14px;
+      padding: 10px 14px;
       background: var(--card2);
       border-radius: var(--radius);
       cursor: pointer;
@@ -153,20 +156,41 @@
     .section-name  { font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
     .section-right { display: flex; align-items: center; gap: 10px; }
 
-    .section-count          { font-size: 13px; color: var(--dim); font-weight: 600; }
-    .section-count.complete { color: var(--green); }
+    .section-count              { font-size: 13px; color: var(--dim); font-weight: 600; }
+    .section-count.has-progress { color: var(--green); }
+    .section-count.complete     { color: var(--green); }
 
     .chevron      { color: var(--dim); font-size: 13px; transition: transform 0.2s; }
     .chevron.open { transform: rotate(180deg); }
 
     /* right-arm note */
+    .tnote {
+      margin: 0 0 12px 0;
+      border-radius: 12px;
+      background: var(--card);
+      overflow: hidden;
+      border: 1px solid var(--card2);
+    }
+    .tnote-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 12px; font-size: 12px; font-weight: 700;
+      color: var(--dim); cursor: pointer;
+    }
+    .tnote-chevron { font-size: 12px; }
+    .tnote-body {
+      padding: 0 16px 14px;
+      font-size: 13px; color: var(--text); line-height: 1.6;
+    }
+    .tnote-body p { margin: 0 0 8px; }
+    .tnote-body p:last-child { margin-bottom: 0; }
+
     .section-note {
-      background: rgba(255,107,0,0.10);
-      border: 1px solid rgba(255,107,0,0.25);
+      background: rgba(48,209,88,0.08);
+      border: 1px solid rgba(48,209,88,0.2);
       border-top: none;
-      padding: 7px 14px;
+      padding: 6px 14px;
       font-size: 12px;
-      color: var(--accent);
+      color: var(--green);
       font-weight: 600;
     }
 
@@ -195,9 +219,9 @@
     .exercise-item {
       display: flex;
       align-items: center;
-      padding: 13px 14px;
-      gap: 12px;
-      min-height: 50px;
+      padding: 9px 14px;
+      gap: 10px;
+      min-height: 40px;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
@@ -298,20 +322,20 @@
     .app-footer {
       position: fixed;
       bottom: 0; left: 0; right: 0;
-      padding: 12px 16px;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      padding: 8px 16px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
       background: var(--card);
       border-top: 1px solid var(--border);
     }
 
     .reset-btn {
       width: 100%;
-      padding: 15px;
+      padding: 9px;
       border: none;
-      border-radius: 12px;
-      background: rgba(255,69,58,0.15);
-      color: var(--red);
-      font-size: 15px;
+      border-radius: 10px;
+      background: rgba(255,107,0,0.15);
+      color: var(--accent);
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       letter-spacing: 0.3px;
@@ -379,6 +403,16 @@
       margin-bottom: 12px;
     }
 
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--dim);
+      font-size: 16px;
+      cursor: pointer;
+    }
     .edit-toggle {
       padding: 6px 16px;
       border: none;
@@ -391,6 +425,55 @@
       letter-spacing: 0.3px;
     }
     .edit-toggle.active { background: var(--accent); color: #fff; }
+    .complete-btn, .finish-btn {
+      padding: 6px 14px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      min-height: 44px; min-width: 100px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .complete-btn { background: rgba(48,209,88,0.15);  color: var(--green);  }
+    .finish-btn   { background: rgba(255,107,0,0.15);  color: var(--accent); }
+    .sum-header { margin-bottom: 12px; }
+    .sum-title { font-size: 18px; font-weight: 800; color: var(--green); }
+    .sum-date { font-size: 12px; color: var(--dim); margin-top: 2px; }
+    .sum-stat { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+    .sum-sections { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .sum-row { display: flex; justify-content: space-between; font-size: 13px; }
+    .sum-name { color: var(--text); font-weight: 600; }
+    .sum-count { color: var(--green); font-weight: 700; }
+    .sum-kudos { font-size: 13px; color: var(--dim); font-style: italic; margin-bottom: 16px; line-height: 1.5; }
+
+    .drag-handle {
+      color: var(--dim); font-size: 20px; padding-right: 10px;
+      cursor: grab; touch-action: none; user-select: none; flex-shrink: 0;
+    }
+    .section.dragging { opacity: 0.35; }
+    .section.drag-over { outline: 2px solid var(--accent); border-radius: 12px; }
+    .add-section-btn {
+      width: 100%; padding: 11px; margin-top: 8px;
+      border: 1.5px dashed var(--card2); border-radius: 12px;
+      background: transparent; color: var(--dim);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+
+    .sched-modal { max-height: 85vh; overflow-y: auto; }
+    .hist-modal  { max-height: 85vh; overflow-y: auto; }
+    .hist-list   { display: flex; flex-direction: column; gap: 16px; }
+    .hist-week   { background: var(--card2); border-radius: 10px; padding: 10px 12px; }
+    .hist-week-hdr { font-size: 12px; font-weight: 800; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .hist-row    { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; border-top: 1px solid var(--border); }
+    .hist-date   { color: var(--dim); font-weight: 600; min-width: 52px; }
+    .hist-type   { color: var(--text); font-weight: 600; flex: 1; }
+    .hist-stat   { color: var(--green); font-weight: 700; }
+    .sched-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .sched-row { display: flex; align-items: center; gap: 10px; }
+    .sched-day { width: 36px; font-weight: 700; font-size: 13px; color: var(--text); flex-shrink: 0; }
+    .sched-opts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sched-btn {
+      padding: 5px 10px; border: 1.5px solid var(--card2); border-radius: 8px;
+      background: transparent; color: var(--dim); font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .sched-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(255,107,0,0.1); }
 
     .delete-btn {
       width: 26px;
@@ -706,35 +789,52 @@ const EXERCISES = {
 // STATE
 // ─────────────────────────────────────────────
 
-const KEY     = 'wl26';
-const KEY_COL = 'wl26_col';
-const KEY_EX  = 'wl26_ex';
+const KEY       = 'wl26';
+const KEY_COL   = 'wl26_col';
+const KEY_EX    = 'wl26_ex';
+const KEY_SCHED = 'wl26_sched';
+const KEY_DONE  = 'wl26_done';
+const KEY_HIST  = 'wl26_history';
 
-let currentDate      = getDefaultDate();
+// 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+const DEFAULT_SCHEDULE = { 0: null, 1: 'fullBody', 2: 'legsCore', 3: 'fullBody', 4: 'legsCore', 5: 'fullBody', 6: null };
+
+let schedule         = Object.assign({}, DEFAULT_SCHEDULE);
 let state            = {};
 let collapsed        = {};
 let customExercises  = null;
 let editMode         = false;
 let modal            = null;
+let completedDays    = {};
+let workoutHistory   = [];
+
+function loadSchedule() {
+  try { const r = localStorage.getItem(KEY_SCHED); if (r) schedule = JSON.parse(r); } catch(e) {}
+}
+function saveSchedule()      { localStorage.setItem(KEY_SCHED, JSON.stringify(schedule)); }
+function saveHistory()       { localStorage.setItem(KEY_HIST,  JSON.stringify(workoutHistory)); }
 
 function getDefaultDate() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
-  const day = d.getDay();
-  if (day === 0) d.setDate(d.getDate() - 2);
-  if (day === 6) d.setDate(d.getDate() - 1);
   return d;
 }
 
+let currentDate = getDefaultDate();
+
 function loadState() {
-  try { state           = JSON.parse(localStorage.getItem(KEY))     || {}; } catch(e) { state = {}; }
-  try { collapsed       = JSON.parse(localStorage.getItem(KEY_COL)) || {}; } catch(e) { collapsed = {}; }
+  loadSchedule();
+  try { state           = JSON.parse(localStorage.getItem(KEY))      || {}; } catch(e) { state = {}; }
+  try { collapsed       = JSON.parse(localStorage.getItem(KEY_COL))  || {}; } catch(e) { collapsed = {}; }
+  try { completedDays   = JSON.parse(localStorage.getItem(KEY_DONE)) || {}; } catch(e) { completedDays = {}; }
+  try { workoutHistory  = JSON.parse(localStorage.getItem(KEY_HIST)) || []; } catch(e) { workoutHistory = []; }
   try { const r = localStorage.getItem(KEY_EX); if (r) customExercises = JSON.parse(r); } catch(e) {}
 }
 
-function saveState()          { localStorage.setItem(KEY,     JSON.stringify(state)); }
-function saveCollapsed()      { localStorage.setItem(KEY_COL, JSON.stringify(collapsed)); }
-function saveCustomExercises(){ localStorage.setItem(KEY_EX,  JSON.stringify(customExercises)); }
+function saveState()          { localStorage.setItem(KEY,      JSON.stringify(state)); }
+function saveCollapsed()      { localStorage.setItem(KEY_COL,  JSON.stringify(collapsed)); }
+function saveCustomExercises(){ localStorage.setItem(KEY_EX,   JSON.stringify(customExercises)); }
+function saveCompletedDays()  { localStorage.setItem(KEY_DONE, JSON.stringify(completedDays)); }
 
 function getExercises() { return customExercises || EXERCISES; }
 
@@ -769,7 +869,7 @@ function getMonday(d) {
 
 function getWeekDays(d) {
   const mon = getMonday(d);
-  return Array.from({ length: 5 }, (_, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const day = new Date(mon);
     day.setDate(day.getDate() + i);
     return day;
@@ -777,10 +877,15 @@ function getWeekDays(d) {
 }
 
 function getWorkoutType(d) {
-  const day = d.getDay();
-  if ([1, 3, 5].includes(day)) return 'fullBody';
-  if ([2, 4].includes(day))    return 'legsCore';
-  return null;
+  return schedule[d.getDay()] || null;
+}
+
+const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+function getScheduledDaysLabel(type) {
+  return Object.entries(schedule)
+    .filter(([,v]) => v === type)
+    .map(([k]) => DAY_NAMES[+k])
+    .join(' · ');
 }
 
 function hasAnyProgress(d) {
@@ -922,26 +1027,162 @@ function saveModalEdit() {
 // ─────────────────────────────────────────────
 
 function closeModal()   { modal = null; render(); }
-function confirmReset() { modal = { type: 'reset' }; render(); }
+function confirmReset() { modal = { type: 'resetStep1' }; render(); }
+function confirmResetStep2() { modal = { type: 'resetStep2' }; render(); }
 
-function doReset() {
-  getWeekDays(currentDate).forEach(d => delete state[dateKey(d)]);
-  saveState();
+// ── ADD SECTION ───────────────────────────────
+function openAddSectionModal(type) { modal = { type: 'addSection', workoutType: type }; render(); }
+function saveNewSection() {
+  const val = document.getElementById('modal-input')?.value.trim().toUpperCase();
+  if (!val) return;
+  ensureCustomExercises();
+  customExercises[modal.workoutType].push({
+    id: 'sec_' + Date.now(), name: val, icon: '',
+    groups: [{ name: '', items: [] }], rightArm: false
+  });
+  saveCustomExercises();
   modal = null;
   render();
 }
+
+// ── DRAG-TO-REORDER SECTIONS ──────────────────
+let drag = null;
+function startDrag(e, idx, type) {
+  e.preventDefault(); e.stopPropagation();
+  drag = { srcIdx: idx, type, overIdx: idx };
+  document.querySelector(`[data-sec-idx="${idx}"]`)?.classList.add('dragging');
+}
+function _dragMove(clientY) {
+  if (!drag) return;
+  const sections = [...document.querySelectorAll('[data-sec-idx]')];
+  let overIdx = drag.srcIdx;
+  sections.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (clientY > rect.top + rect.height / 2) overIdx = parseInt(el.dataset.secIdx);
+  });
+  if (overIdx !== drag.overIdx) {
+    sections.forEach(el => el.classList.remove('drag-over'));
+    document.querySelector(`[data-sec-idx="${overIdx}"]`)?.classList.add('drag-over');
+    drag.overIdx = overIdx;
+  }
+}
+function _dragEnd(clientY) {
+  if (!drag) return;
+  const { srcIdx, type, overIdx } = drag;
+  drag = null;
+  if (overIdx !== srcIdx) {
+    ensureCustomExercises();
+    const arr = customExercises[type];
+    const [removed] = arr.splice(srcIdx, 1);
+    arr.splice(overIdx, 0, removed);
+    saveCustomExercises();
+  }
+  render();
+}
+document.addEventListener('touchmove', e => { if (drag) { e.preventDefault(); _dragMove(e.touches[0].clientY); } }, { passive: false });
+document.addEventListener('touchend',  e => { if (drag) _dragEnd(e.changedTouches[0].clientY); });
+document.addEventListener('mousemove', e => { if (drag) _dragMove(e.clientY); });
+document.addEventListener('mouseup',   e => { if (drag) _dragEnd(e.clientY); });
+
+function openSettings() { modal = { type: 'schedule', draft: Object.assign({}, schedule) }; render(); }
+function openEditFromSettings() { modal = null; editMode = true; render(); }
+
+const KUDOS = [
+  "Beast mode. You showed up and put in the work.",
+  "Another day, another win. Keep stacking them.",
+  "That's what dedication looks like. Well done.",
+  "You came, you lifted, you crushed it.",
+  "One more session in the books. Keep going.",
+  "Consistency is the game — you're playing it right.",
+  "Strong work today. Your future self thanks you."
+];
+
+function markComplete() {
+  completedDays[dateKey(currentDate)] = true;
+  saveCompletedDays();
+  showSummary();
+}
+
+function showSummary() {
+  const type = getWorkoutType(currentDate);
+  if (!type) return;
+  const ds = getDayState(currentDate);
+  const exercises = getExercises();
+  let totalDone = 0, totalAll = 0;
+  const sectionSummaries = [];
+  exercises[type].forEach(sec => {
+    let secDone = 0, secTotal = 0;
+    sec.groups.forEach(g => g.items.forEach(item => {
+      secTotal++;
+      if (ds.checked[item.id]) { secDone++; totalDone++; }
+      totalAll++;
+    }));
+    if (secDone > 0) sectionSummaries.push({ name: sec.name, done: secDone, total: secTotal });
+  });
+  const kudos = KUDOS[Math.floor(Math.random() * KUDOS.length)];
+  modal = { type: 'summary', totalDone, totalAll, sectionSummaries, kudos };
+  render();
+}
+function setSchedDay(i, val) { modal.draft[i] = val; render(); }
+function saveSettings() {
+  schedule = Object.assign({}, modal.draft);
+  saveSchedule();
+  modal = null;
+  currentDate = getDefaultDate();
+  render();
+}
+
+function doReset() {
+  const weekDays  = getWeekDays(currentDate);
+  const weekStart = dateKey(weekDays[0]);
+  const weekEnd   = dateKey(weekDays[weekDays.length - 1]);
+  const exercises = getExercises();
+
+  // Build per-day summary for archive
+  const days = weekDays.map(d => {
+    const dk   = dateKey(d);
+    const type = getWorkoutType(d);
+    if (!type) return null;
+    let done = 0, total = 0;
+    exercises[type].forEach(sec =>
+      sec.groups.forEach(g => g.items.forEach(item => {
+        total++;
+        if (state[dk]?.checked?.[item.id]) done++;
+      }))
+    );
+    if (total === 0) return null;
+    return { date: dk, type, done, total, completed: !!completedDays[dk] };
+  }).filter(Boolean);
+
+  if (days.length > 0) {
+    workoutHistory.unshift({ weekStart, weekEnd, days });
+    saveHistory();
+  }
+
+  weekDays.forEach(d => {
+    delete state[dateKey(d)];
+    delete completedDays[dateKey(d)];
+  });
+  saveState();
+  saveCompletedDays();
+  modal = null;
+  render();
+}
+
+function openHistory() { modal = { type: 'history' }; render(); }
 
 // ─────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────
 
-const DAY_LETTERS = ['M','T','W','T','F'];
+const DAY_LETTERS = ['M','T','W','T','F','S','S'];
 
 function renderWeekTabs() {
   return getWeekDays(currentDate).map((d, i) => {
     const active      = dateKey(d) === dateKey(currentDate);
     const hasProgress = hasAnyProgress(d);
-    const cls = ['day-tab', active ? 'active' : '', (!active && hasProgress) ? 'has-progress' : '']
+    const isWeekend   = d.getDay() === 6 || d.getDay() === 0;
+    const cls = ['day-tab', isWeekend ? 'weekend' : '', active ? 'active' : '', (!active && hasProgress) ? 'has-progress' : '']
       .filter(Boolean).join(' ');
     return `<button class="${cls}" onclick="switchDay('${dateKey(d)}')">
       <span class="day-letter">${DAY_LETTERS[i]}</span>
@@ -968,7 +1209,7 @@ function renderExercise(item, ds, workoutType, sectionId) {
     return !!state[dateKey(d)]?.checked?.[item.id];
   });
   const badgesHtml = doneDays.length
-    ? `<div class="day-badges">${doneDays.map(d => `<span class="day-badge">${DAY_LETTERS[d.getDay()-1]}</span>`).join('')}</div>`
+    ? `<div class="day-badges">${doneDays.map(d => `<span class="day-badge">${['S','M','T','W','T','F','S'][d.getDay()]}</span>`).join('')}</div>`
     : '';
 
   let timeHtml = '';
@@ -988,14 +1229,14 @@ function renderExercise(item, ds, workoutType, sectionId) {
   </div>`;
 }
 
-function renderSection(sec, type) {
+function renderSection(sec, type, idx) {
   const ds          = getDayState(currentDate);
   const isCollapsed = collapsed[sec.id] !== false;
   const { done, total } = getSectionProgress(sec.id, type, currentDate);
   const complete    = done === total && total > 0;
 
   const headerCls  = `section-header${isCollapsed ? '' : ' open'}`;
-  const countCls   = `section-count${complete ? ' complete' : ''}`;
+  const countCls   = `section-count${complete ? ' complete' : (done > 0 ? ' has-progress' : '')}`;
   const chevronCls = `chevron${isCollapsed ? '' : ' open'}`;
 
   let body = '';
@@ -1014,10 +1255,10 @@ function renderSection(sec, type) {
     body = `${noteHtml}<div class="section-body">${groupsHtml}</div>`;
   }
 
-  return `<div class="section">
+  return `<div class="section" data-sec-idx="${idx}" data-sec-type="${type}">
     <div class="${headerCls}" onclick="toggleSection('${sec.id}')">
       <div class="section-left">
-        <span class="section-icon">${sec.icon}</span>
+        ${editMode ? `<span class="drag-handle" ontouchstart="startDrag(event,${idx},'${type}')" onmousedown="startDrag(event,${idx},'${type}')">≡</span>` : ''}
         <span class="section-name">${sec.name}</span>
       </div>
       <div class="section-right">
@@ -1029,16 +1270,86 @@ function renderSection(sec, type) {
   </div>`;
 }
 
+let trainerNoteOpen = false;
+function toggleTrainerNote() { trainerNoteOpen = !trainerNoteOpen; render(); }
+function renderTrainerNote() {
+  const body = trainerNoteOpen ? `
+    <div class="tnote-body">
+      <p><strong style="color:var(--green)">WORKOUT ADJUSTMENT</strong> <span style="color:var(--text);font-weight:normal;font-size:0.9em">(SAT APR 4 2026)</span><br>
+      Jim Delgado, CKTP, CMCE | Exercise Physiologist</p>
+      <p><strong style="color:var(--green)">RIGHT ARM</strong><span style="color:var(--green);font-weight:normal"> (extra right arm set):</span> Add a few extra unilateral sets on the right side each session.</p>
+      <p><strong style="color:var(--green)">LEGS</strong><span style="color:var(--green);font-weight:normal"> (2 Leg Days):</span> Two dedicated leg/core days. Only do treadmill cardio for a few minutes to stretch out before and after.</p>
+    </div>` : '';
+  return `<div class="tnote">
+    <div class="tnote-header" onclick="toggleTrainerNote()">
+      <span>📋 Trainer Notes</span>
+      <span class="tnote-chevron">${trainerNoteOpen ? '▾' : '▸'}</span>
+    </div>
+    ${body}
+  </div>`;
+}
+
 function renderModal() {
   if (!modal) return '';
-  if (modal.type === 'reset') {
+  if (modal.type === 'resetStep1') {
+    const weekDays  = getWeekDays(currentDate);
+    const weekStart = weekDays[0];
+    const weekEnd   = weekDays[weekDays.length - 1];
+    const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     return `<div class="modal-overlay">
       <div class="modal">
-        <h3>Start New Week?</h3>
-        <p>This clears all checked exercises for the entire week. Ready to reset?</p>
-        <div class="modal-actions">
+        <h3>↻ Start New Week</h3>
+        <p>This will <strong style="color:var(--green)">archive</strong> your workout data for <strong>${fmt(weekStart)} – ${fmt(weekEnd)}</strong>, then clear all checked exercises so you can start fresh.</p>
+        <p style="margin-top:8px">Your history will be saved and accessible from the gear menu.</p>
+        <div class="modal-actions" style="margin-top:16px">
           <button class="modal-btn cancel"  onclick="closeModal()">Cancel</button>
-          <button class="modal-btn confirm" onclick="doReset()">Clear &amp; Reset</button>
+          <button class="modal-btn confirm" onclick="confirmResetStep2()">Archive &amp; Continue →</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'resetStep2') {
+    return `<div class="modal-overlay">
+      <div class="modal">
+        <h3>Are You Sure?</h3>
+        <p>This week's checked exercises will be <strong style="color:var(--accent)">cleared</strong>. Your data has already been archived and will still be viewable in History.</p>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="modal-btn cancel"  onclick="confirmReset()">← Go Back</button>
+          <button class="modal-btn danger"  onclick="doReset()">Archive &amp; Start Fresh</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'history') {
+    let body = '';
+    if (workoutHistory.length === 0) {
+      body = `<p style="color:var(--dim);text-align:center;padding:20px 0">No archived weeks yet.<br>Hit <strong>↻ Start New Week</strong> to save your first week.</p>`;
+    } else {
+      body = workoutHistory.map(week => {
+        const fmt = ds => { const [y,m,d] = ds.split('-'); return new Date(+y,+m-1,+d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
+        const rows = week.days.map(d => {
+          const label = d.type === 'fullBody' ? 'Full Body' : 'Legs & Core';
+          const pct   = d.total ? Math.round((d.done / d.total) * 100) : 0;
+          const tick  = d.completed ? `<span style="color:var(--green)">☑</span>` : `<span style="color:var(--dim)">☐</span>`;
+          return `<div class="hist-row">
+            <span class="hist-date">${fmt(d.date)}</span>
+            <span class="hist-type">${label}</span>
+            <span class="hist-stat">${d.done}/${d.total} <span style="color:var(--dim);font-weight:400">(${pct}%)</span></span>
+            ${tick}
+          </div>`;
+        }).join('');
+        return `<div class="hist-week">
+          <div class="hist-week-hdr">${fmt(week.weekStart)} – ${fmt(week.weekEnd)}</div>
+          ${rows}
+        </div>`;
+      }).join('');
+    }
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal hist-modal" onclick="event.stopPropagation()">
+        <h3>📋 Workout History</h3>
+        <div class="hist-list">${body}</div>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="modal-btn confirm" onclick="closeModal()">Close</button>
         </div>
       </div>
     </div>`;
@@ -1051,6 +1362,66 @@ function renderModal() {
         <div class="modal-actions">
           <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
           <button class="modal-btn confirm" onclick="saveModalEdit()">Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'summary') {
+    const { totalDone, totalAll, sectionSummaries, kudos } = modal;
+    const pct = totalAll ? Math.round((totalDone / totalAll) * 100) : 0;
+    const rows = sectionSummaries.map(s =>
+      `<div class="sum-row"><span class="sum-name">${s.name}</span><span class="sum-count">${s.done}/${s.total}</span></div>`
+    ).join('');
+    const dateStr = currentDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="sum-header">
+          <div class="sum-title">Workout Complete</div>
+          <div class="sum-date">${dateStr}</div>
+        </div>
+        <div class="sum-stat">${totalDone} / ${totalAll} exercises &nbsp;·&nbsp; ${pct}%</div>
+        <div class="sum-sections">${rows || '<div style="color:var(--dim);font-size:13px">No exercises logged yet.</div>'}</div>
+        <div class="sum-kudos">${kudos}</div>
+        <div class="modal-actions">
+          <button class="modal-btn confirm" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'addSection') {
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Add Section</h3>
+        <input id="modal-input" class="modal-input" type="text" placeholder="Section name (e.g. CALVES)">
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveNewSection()">Add</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'schedule') {
+    const days = [['Mon',1],['Tue',2],['Wed',3],['Thu',4],['Fri',5],['Sat',6],['Sun',0]];
+    const rows = days.map(([name, i]) => {
+      const cur = modal.draft[i];
+      return `<div class="sched-row">
+        <span class="sched-day">${name}</span>
+        <div class="sched-opts">
+          <button class="sched-btn${cur==='fullBody'?' sel':''}" onclick="setSchedDay(${i},'fullBody')">Full Body</button>
+          <button class="sched-btn${cur==='legsCore'?' sel':''}" onclick="setSchedDay(${i},'legsCore')">Legs &amp; Core</button>
+          <button class="sched-btn${cur===null?' sel':''}" onclick="setSchedDay(${i},null)">Rest</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal sched-modal" onclick="event.stopPropagation()">
+        <h3>Workout Schedule</h3>
+        <div class="sched-list">${rows}</div>
+        <div class="modal-actions" style="flex-wrap:wrap;gap:8px">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit</button>
+          <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
+          <button class="modal-btn confirm" onclick="saveSettings()">Save</button>
         </div>
       </div>
     </div>`;
@@ -1075,16 +1446,21 @@ function renderModal() {
 function render() {
   const type = getWorkoutType(currentDate);
 
+  const isDone  = type ? !!completedDays[dateKey(currentDate)] : false;
   const editBtn = type
-    ? `<button class="edit-toggle${editMode ? ' active' : ''}" onclick="toggleEditMode()">${editMode ? 'Done' : '✎ Edit'}</button>`
+    ? (editMode
+        ? `<button class="edit-toggle active" onclick="toggleEditMode()">Done</button>`
+        : isDone
+          ? `<button class="complete-btn" onclick="showSummary()">✓ Complete</button>`
+          : `<button class="finish-btn" onclick="markComplete()">☐ Finish</button>`)
     : '';
 
   let headerMeta = '';
   if (type) {
     const { done, total } = getProgress(type, currentDate);
     const pct   = total ? Math.round((done / total) * 100) : 0;
-    const label = type === 'fullBody' ? '🏋🏽 FULL BODY' : '🦵 LEGS & CORE';
-    const days  = type === 'fullBody' ? 'MON · WED · FRI' : 'TUE · THU';
+    const label = type === 'fullBody' ? 'FULL BODY' : 'LEGS & CORE';
+    const days  = getScheduledDaysLabel(type);
     headerMeta = `
     <div class="workout-meta">
       <div>
@@ -1103,7 +1479,8 @@ function render() {
   }
 
   const content = type
-    ? getExercises()[type].map(s => renderSection(s, type)).join('')
+    ? getExercises()[type].map((s, i) => renderSection(s, type, i)).join('') +
+      (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '')
     : `<div class="rest-day">
         <div class="rest-icon">💤</div>
         <div class="rest-title">Rest Day</div>
@@ -1114,14 +1491,18 @@ function render() {
     <div class="app-header">
       <div class="app-title-row">
         <div class="app-title">🏋🏽 Workout Log | 2026</div>
-        ${editBtn}
+        <div class="header-actions">
+          <button class="icon-btn" onclick="openSettings()" title="Schedule">⚙︎</button>
+          ${editBtn}
+        </div>
       </div>
       <div class="week-tabs">${renderWeekTabs()}</div>
       ${headerMeta}
     </div>
+    ${renderTrainerNote()}
     ${content}
     <div class="app-footer">
-      <button class="reset-btn" onclick="confirmReset()">🗑&nbsp; NEW WEEK — CLEAR ALL</button>
+      <button class="reset-btn" onclick="confirmReset()">↻&nbsp; START NEW WEEK</button>
     </div>
     ${renderModal()}
   `;
@@ -1132,6 +1513,7 @@ function render() {
 // ─────────────────────────────────────────────
 
 loadState();
+currentDate = getDefaultDate();
 render();
 </script>
 </body>
