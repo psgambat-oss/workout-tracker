@@ -456,6 +456,12 @@
       font-size: 14px; font-weight: 700; cursor: pointer;
     }
 
+    .streak-badge { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0; margin-left: 6px; }
+    .stats-card { display:flex; margin: 8px 0 2px; background: var(--card); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+    .stats-cell { flex: 1; padding: 7px 4px; text-align: center; }
+    .stats-cell + .stats-cell { border-left: 1px solid var(--border); }
+    .stats-label { font-size: 9px; color: var(--dim); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .stats-value { font-size: 14px; font-weight: 800; color: var(--text); margin-top: 1px; }
     .sched-modal { max-height: 85vh; overflow-y: auto; }
     .hist-modal  { max-height: 85vh; overflow-y: auto; }
     .hist-list   { display: flex; flex-direction: column; gap: 16px; }
@@ -465,15 +471,22 @@
     .hist-date   { color: var(--dim); font-weight: 600; min-width: 52px; }
     .hist-type   { color: var(--text); font-weight: 600; flex: 1; }
     .hist-stat   { color: var(--green); font-weight: 700; }
-    .sched-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
-    .sched-row { display: flex; align-items: center; gap: 10px; }
-    .sched-day { width: 36px; font-weight: 700; font-size: 13px; color: var(--text); flex-shrink: 0; }
-    .sched-opts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .settings-section { margin-bottom: 16px; }
+    .settings-section-hdr { font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+    .sched-list { display: flex; flex-direction: column; gap: 8px; }
+    .sched-row { display: flex; align-items: center; gap: 8px; }
+    .sched-day { width: 32px; font-weight: 700; font-size: 13px; color: var(--text); flex-shrink: 0; }
+    .sched-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; flex: 1; }
     .sched-btn {
-      padding: 5px 10px; border: 1.5px solid var(--card2); border-radius: 8px;
-      background: transparent; color: var(--dim); font-size: 12px; font-weight: 600; cursor: pointer;
+      padding: 5px 4px; border: 1.5px solid var(--card2); border-radius: 7px;
+      background: transparent; color: var(--dim); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;
     }
     .sched-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(255,107,0,0.1); }
+    .settings-seg { display:flex; background:var(--card2); border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+    .settings-seg span { flex:1; padding:8px 4px; text-align:center; font-size:12px; font-weight:700; cursor:pointer; }
+    .settings-seg span + span { border-left:1px solid var(--border); }
+    .settings-tools { display:flex; gap:8px; }
+    .settings-tools button { flex:1; }
 
     .delete-btn {
       width: 26px;
@@ -792,13 +805,15 @@ const EXERCISES = {
 const KEY       = 'wl26';
 const KEY_COL   = 'wl26_col';
 const KEY_EX    = 'wl26_ex';
-const KEY_SCHED = 'wl26_sched';
-const KEY_DONE  = 'wl26_done';
-const KEY_HIST  = 'wl26_history';
+const KEY_SCHED  = 'wl26_sched';
+const KEY_DONE   = 'wl26_done';
+const KEY_HIST   = 'wl26_history';
+const KEY_PREFS  = 'wl26_prefs';
 
 // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 const DEFAULT_SCHEDULE = { 0: null, 1: 'fullBody', 2: 'legsCore', 3: 'fullBody', 4: 'legsCore', 5: 'fullBody', 6: null };
 
+let statsMode        = 'off'; // 'off' | 'auto' | 'always'
 let schedule         = Object.assign({}, DEFAULT_SCHEDULE);
 let state            = {};
 let collapsed        = {};
@@ -813,6 +828,8 @@ function loadSchedule() {
 }
 function saveSchedule()      { localStorage.setItem(KEY_SCHED, JSON.stringify(schedule)); }
 function saveHistory()       { localStorage.setItem(KEY_HIST,  JSON.stringify(workoutHistory)); }
+function savePrefs()         { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode })); }
+function setStatsMode(mode)  { statsMode = mode; savePrefs(); render(); }
 
 function getDefaultDate() {
   const d = new Date();
@@ -828,6 +845,7 @@ function loadState() {
   try { collapsed       = JSON.parse(localStorage.getItem(KEY_COL))  || {}; } catch(e) { collapsed = {}; }
   try { completedDays   = JSON.parse(localStorage.getItem(KEY_DONE)) || {}; } catch(e) { completedDays = {}; }
   try { workoutHistory  = JSON.parse(localStorage.getItem(KEY_HIST)) || []; } catch(e) { workoutHistory = []; }
+  try { const p = localStorage.getItem(KEY_PREFS); if (p) { const prefs = JSON.parse(p); statsMode = prefs.statsMode || 'off'; } } catch(e) {}
   try { const r = localStorage.getItem(KEY_EX); if (r) customExercises = JSON.parse(r); } catch(e) {}
 }
 
@@ -894,25 +912,49 @@ function hasAnyProgress(d) {
 }
 
 function getProgress(type, d) {
-  const ds = getDayState(d);
+  const ds    = getDayState(d);
+  const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
   let total = 0, done = 0;
-  getExercises()[type].forEach(sec =>
-    sec.groups.forEach(g =>
-      g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
+  types.forEach(t =>
+    getExercises()[t].forEach(sec =>
+      sec.groups.forEach(g =>
+        g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
+      )
     )
   );
   return { done, total };
 }
 
 function getSectionProgress(secId, type, d) {
-  const ds  = getDayState(d);
-  const sec = getExercises()[type].find(s => s.id === secId);
+  const ds    = getDayState(d);
+  const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
+  let sec = null;
+  for (const t of types) { sec = getExercises()[t].find(s => s.id === secId); if (sec) break; }
   if (!sec) return { done: 0, total: 0 };
   let total = 0, done = 0;
   sec.groups.forEach(g =>
     g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
   );
   return { done, total };
+}
+
+function getStreak() {
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(today);
+  for (let i = 0; i < 365; i++) {
+    const dk   = dateKey(d);
+    const type = getWorkoutType(d);
+    if (type) {
+      if (completedDays[dk]) {
+        streak++;
+      } else if (dk !== dateKey(today)) {
+        break;
+      }
+    }
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
 }
 
 // ─────────────────────────────────────────────
@@ -1108,9 +1150,10 @@ function showSummary() {
   if (!type) return;
   const ds = getDayState(currentDate);
   const exercises = getExercises();
+  const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
   let totalDone = 0, totalAll = 0;
   const sectionSummaries = [];
-  exercises[type].forEach(sec => {
+  types.forEach(t => exercises[t].forEach(sec => {
     let secDone = 0, secTotal = 0;
     sec.groups.forEach(g => g.items.forEach(item => {
       secTotal++;
@@ -1118,7 +1161,7 @@ function showSummary() {
       totalAll++;
     }));
     if (secDone > 0) sectionSummaries.push({ name: sec.name, done: secDone, total: secTotal });
-  });
+  }));
   const kudos = KUDOS[Math.floor(Math.random() * KUDOS.length)];
   modal = { type: 'summary', totalDone, totalAll, sectionSummaries, kudos };
   render();
@@ -1144,12 +1187,13 @@ function doReset() {
     const type = getWorkoutType(d);
     if (!type) return null;
     let done = 0, total = 0;
-    exercises[type].forEach(sec =>
+    const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
+    types.forEach(t => exercises[t].forEach(sec =>
       sec.groups.forEach(g => g.items.forEach(item => {
         total++;
         if (state[dk]?.checked?.[item.id]) done++;
       }))
-    );
+    ));
     if (total === 0) return null;
     return { date: dk, type, done, total, completed: !!completedDays[dk] };
   }).filter(Boolean);
@@ -1328,7 +1372,7 @@ function renderModal() {
       body = workoutHistory.map(week => {
         const fmt = ds => { const [y,m,d] = ds.split('-'); return new Date(+y,+m-1,+d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
         const rows = week.days.map(d => {
-          const label = d.type === 'fullBody' ? 'Full Body' : 'Legs & Core';
+          const label = d.type === 'fullBody' ? 'Upper Body' : d.type === 'combined' ? 'Full Body' : 'Legs & Core';
           const pct   = d.total ? Math.round((d.done / d.total) * 100) : 0;
           const tick  = d.completed ? `<span style="color:var(--green)">☑</span>` : `<span style="color:var(--dim)">☐</span>`;
           return `<div class="hist-row">
@@ -1407,20 +1451,41 @@ function renderModal() {
       return `<div class="sched-row">
         <span class="sched-day">${name}</span>
         <div class="sched-opts">
-          <button class="sched-btn${cur==='fullBody'?' sel':''}" onclick="setSchedDay(${i},'fullBody')">Full Body</button>
+          <button class="sched-btn${cur==='fullBody'?' sel':''}" onclick="setSchedDay(${i},'fullBody')">Upper Body</button>
           <button class="sched-btn${cur==='legsCore'?' sel':''}" onclick="setSchedDay(${i},'legsCore')">Legs &amp; Core</button>
+          <button class="sched-btn${cur==='combined'?' sel':''}" onclick="setSchedDay(${i},'combined')">Full Body</button>
           <button class="sched-btn${cur===null?' sel':''}" onclick="setSchedDay(${i},null)">Rest</button>
         </div>
       </div>`;
     }).join('');
     return `<div class="modal-overlay" onclick="closeModal()">
       <div class="modal sched-modal" onclick="event.stopPropagation()">
-        <h3>Workout Schedule</h3>
-        <div class="sched-list">${rows}</div>
-        <div class="modal-actions" style="flex-wrap:wrap;gap:8px">
+        <h3>⚙︎ Settings</h3>
+
+        <div class="settings-section">
+          <div class="settings-section-hdr">📅 Workout Schedule</div>
+          <div class="sched-list">${rows}</div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-hdr">📊 Weekly Stats</div>
+          <div class="settings-seg">
+            <span onclick="setStatsMode('off')" style="${statsMode==='off'?'background:rgba(255,107,0,0.2);color:var(--accent)':'color:var(--dim)'}">Off</span>
+            <span onclick="setStatsMode('auto')" style="${statsMode==='auto'?'background:rgba(48,209,88,0.15);color:var(--green)':'color:var(--dim)'}">After Finish</span>
+            <span onclick="setStatsMode('always')" style="${statsMode==='always'?'background:rgba(48,209,88,0.15);color:var(--green)':'color:var(--dim)'}">Always</span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-hdr">🛠 Tools</div>
+          <div class="settings-tools">
+            <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit Exercises</button>
+            <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
           <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
-          <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit</button>
-          <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
           <button class="modal-btn confirm" onclick="saveSettings()">Save</button>
         </div>
       </div>
@@ -1443,6 +1508,27 @@ function renderModal() {
   return '';
 }
 
+function renderStatsCard() {
+  if (statsMode === 'off') return '';
+  if (statsMode === 'auto' && !completedDays[dateKey(currentDate)]) return '';
+  const weekDays = getWeekDays(currentDate);
+  const workoutDays = weekDays.filter(d => getWorkoutType(d));
+  const completed = workoutDays.filter(d => completedDays[dateKey(d)]).length;
+  let totalPct = 0, pctCount = 0;
+  workoutDays.forEach(d => {
+    const type = getWorkoutType(d);
+    const { done, total } = getProgress(type, d);
+    if (total > 0) { totalPct += Math.round((done / total) * 100); pctCount++; }
+  });
+  const avg = pctCount ? Math.round(totalPct / pctCount) : 0;
+  const streak = getStreak();
+  return `<div class="stats-card">
+    <div class="stats-cell"><div class="stats-label">This Week</div><div class="stats-value">${completed} / ${workoutDays.length}</div></div>
+    <div class="stats-cell"><div class="stats-label">Avg Done</div><div class="stats-value">${avg}%</div></div>
+    <div class="stats-cell"><div class="stats-label">Streak</div><div class="stats-value">🔥 ${streak}</div></div>
+  </div>`;
+}
+
 function render() {
   const type = getWorkoutType(currentDate);
 
@@ -1459,7 +1545,7 @@ function render() {
   if (type) {
     const { done, total } = getProgress(type, currentDate);
     const pct   = total ? Math.round((done / total) * 100) : 0;
-    const label = type === 'fullBody' ? 'FULL BODY' : 'LEGS & CORE';
+    const label = type === 'fullBody' ? 'UPPER BODY' : type === 'combined' ? 'FULL BODY' : 'LEGS & CORE';
     const days  = getScheduledDaysLabel(type);
     headerMeta = `
     <div class="workout-meta">
@@ -1478,25 +1564,37 @@ function render() {
     </div>`}`;
   }
 
-  const content = type
-    ? getExercises()[type].map((s, i) => renderSection(s, type, i)).join('') +
-      (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '')
-    : `<div class="rest-day">
+  let content;
+  if (type === 'combined') {
+    content = [
+      ...getExercises()['fullBody'].map((s, i) => renderSection(s, 'fullBody', i)),
+      ...getExercises()['legsCore'].map((s, i) => renderSection(s, 'legsCore', i))
+    ].join('');
+  } else if (type) {
+    content = getExercises()[type].map((s, i) => renderSection(s, type, i)).join('') +
+      (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '');
+  } else {
+    content = `<div class="rest-day">
         <div class="rest-icon">💤</div>
         <div class="rest-title">Rest Day</div>
         <div class="rest-sub">No workout scheduled.<br>Tap a day above to review.</div>
       </div>`;
+  }
+
+  const streak = getStreak();
+  const streakBadge = streak > 0 ? `<span class="streak-badge">🔥 ${streak}</span>` : '';
 
   document.getElementById('app').innerHTML = `
     <div class="app-header">
       <div class="app-title-row">
-        <div class="app-title">🏋🏽 Workout Log | 2026</div>
+        <div class="app-title">🏋🏽 Workout Log | 2026 ${streakBadge}</div>
         <div class="header-actions">
           <button class="icon-btn" onclick="openSettings()" title="Schedule">⚙︎</button>
           ${editBtn}
         </div>
       </div>
       <div class="week-tabs">${renderWeekTabs()}</div>
+      ${renderStatsCard()}
       ${headerMeta}
     </div>
     ${renderTrainerNote()}
