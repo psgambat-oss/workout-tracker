@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Workout">
+  <title>Workout Log</title>
+  <style>
+    :root {
+      --bg:      #0f0f0f;
+      --card:    #1c1c1e;
+      --card2:   #2c2c2e;
+      --accent:  #ff6b00;
+      --green:   #30d158;
+      --red:     #ff453a;
+      --text:    #ffffff;
+      --dim:     #8e8e93;
+      --border:  #3a3a3c;
+      --radius:  12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 90px;
+      overscroll-behavior: none;
+    }
+
+    /* ── HEADER ── */
+    .app-header {
+      background: var(--card);
+      padding: 54px 16px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ── WEEK TABS ── */
+    .week-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .day-tab {
+      flex: 1;
+      padding: 7px 4px;
+      border: none;
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--dim);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      min-height: 54px;
+      justify-content: center;
+    }
+
+    .day-tab .day-letter { font-size: 14px; font-weight: 800; }
+    .day-tab .day-num   { font-size: 11px; }
+    .day-tab .day-dot   { width: 5px; height: 5px; border-radius: 50%; background: transparent; }
+
+    .day-tab.active          { background: var(--accent); color: #fff; }
+    .day-tab.has-progress .day-dot { background: var(--green); }
+    .day-tab.active .day-dot { background: rgba(255,255,255,0.5); }
+
+    /* ── WORKOUT META ── */
+    .workout-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 32px;
+    }
+
+    .workout-type  { font-size: 17px; font-weight: 800; letter-spacing: 0.3px; }
+    .workout-days  { font-size: 11px; color: var(--dim); font-weight: 600; letter-spacing: 1px; }
+
+    .expand-btns { display: flex; gap: 6px; margin-top: 8px; }
+    .expand-btn {
+      flex: 1;
+      padding: 7px;
+      border: none;
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--dim);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+    .expand-btn:active { background: var(--border); }
+
+    .workout-progress { text-align: right; }
+    .progress-label   { font-size: 13px; color: var(--dim); }
+    .progress-label strong { color: var(--green); }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 5px;
+      width: 80px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* ── SECTIONS ── */
+    .section { margin: 10px 12px 0; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 14px;
+      background: var(--card2);
+      border-radius: var(--radius);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: border-radius 0.1s;
+    }
+
+    .section-header.open { border-radius: var(--radius) var(--radius) 0 0; }
+
+    .section-left  { display: flex; align-items: center; gap: 10px; }
+    .section-icon  { font-size: 18px; }
+    .section-name  { font-size: 15px; font-weight: 700; letter-spacing: 0.3px; }
+    .section-right { display: flex; align-items: center; gap: 10px; }
+
+    .section-count          { font-size: 13px; color: var(--dim); font-weight: 600; }
+    .section-count.complete { color: var(--green); }
+
+    .chevron      { color: var(--dim); font-size: 13px; transition: transform 0.2s; }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* right-arm note */
+    .section-note {
+      background: rgba(255,107,0,0.10);
+      border: 1px solid rgba(255,107,0,0.25);
+      border-top: none;
+      padding: 7px 14px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* section body */
+    .section-body {
+      background: var(--card);
+      border-radius: 0 0 var(--radius) var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-top: none;
+    }
+
+    .group-label {
+      padding: 10px 14px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--dim);
+      text-transform: uppercase;
+      border-top: 1px solid var(--border);
+    }
+
+    .group-label:first-child { border-top: none; }
+
+    /* ── EXERCISE ROW ── */
+    .exercise-item {
+      display: flex;
+      align-items: center;
+      padding: 13px 14px;
+      gap: 12px;
+      min-height: 50px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .exercise-item:active { background: rgba(255,255,255,0.05); }
+
+    .exercise-item.checked .exercise-label {
+      color: var(--dim);
+      text-decoration: line-through;
+    }
+
+    .checkbox {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .exercise-item.checked .checkbox {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .checkmark { display: none; color: #fff; font-size: 14px; font-weight: 700; }
+    .exercise-item.checked .checkmark { display: block; }
+
+    .exercise-label { font-size: 15px; flex: 1; line-height: 1.3; }
+
+    /* ── DAY BADGES ── */
+    .day-badges { display: flex; gap: 3px; flex-shrink: 0; }
+
+    .day-badge {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--green);
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.25);
+      border-radius: 4px;
+      padding: 2px 5px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── TIME CONTROLS (cardio) ── */
+    .time-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .time-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      border: none;
+      background: var(--card2);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .time-display {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 38px;
+      text-align: center;
+    }
+
+    /* ── REST DAY ── */
+    .rest-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .rest-day .rest-icon  { font-size: 60px; }
+    .rest-day .rest-title { font-size: 22px; font-weight: 800; }
+    .rest-day .rest-sub   { font-size: 15px; color: var(--dim); line-height: 1.5; }
+
+    /* ── FOOTER ── */
+    .app-footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      background: var(--card);
+      border-top: 1px solid var(--border);
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255,69,58,0.15);
+      color: var(--red);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+
+    .reset-btn:active { background: rgba(255,69,58,0.25); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+    }
+
+    .modal h3  { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+    .modal p   { font-size: 15px; color: var(--dim); margin-bottom: 22px; line-height: 1.5; }
+
+    .modal-actions { display: flex; gap: 10px; }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .modal-btn.cancel  { background: var(--card2); color: var(--text); }
+    .modal-btn.confirm { background: var(--accent); color: #fff; }
+    .modal-btn.danger  { background: rgba(255,69,58,0.15); color: var(--red); }
+
+    .modal-input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card2);
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: 16px;
+      outline: none;
+      font-family: inherit;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+
+    /* ── EDIT MODE ── */
+    .app-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .edit-toggle {
+      padding: 6px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+    }
+    .edit-toggle.active { background: var(--accent); color: #fff; }
+
+    .delete-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: var(--red);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .add-exercise-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 14px;
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .add-exercise-btn:active { background: rgba(255,107,0,0.08); }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// EXERCISE DATA
+// ─────────────────────────────────────────────
+
+const EXERCISES = {
+  fullBody: [
+    {
+      id: 'chest', name: 'CHEST', icon: '🏋🏽',
+      groups: [
+        { name: 'Dumbbell Press', items: [
+          { id: 'c1',  label: 'Incline x2 arm' },
+          { id: 'c2',  label: 'Incline x1 arm' },
+          { id: 'c3',  label: 'Incline x2 arm close grip' },
+          { id: 'c4',  label: 'Incline x2 arm close grip 25lb plate' },
+          { id: 'c5',  label: 'Flat x2 arm' },
+          { id: 'c6',  label: 'Flat x1 arm' },
+          { id: 'c7',  label: 'Flat x2 arm close grip' },
+          { id: 'c8',  label: 'Decline x2 arm wide grip' },
+          { id: 'c9',  label: 'Decline x2 arm close grip' },
+        ]},
+        { name: 'Bench Press', items: [
+          { id: 'c10', label: 'Smith incline' },
+          { id: 'c11', label: 'Smith decline' },
+          { id: 'c12', label: 'Smith flat' },
+          { id: 'c13', label: 'Machine flat wide grip' },
+          { id: 'c14', label: 'Machine flat close grip' },
+        ]},
+        { name: 'Chest Flys', items: [
+          { id: 'c15', label: 'Machine or cable seated incline' },
+          { id: 'c16', label: 'Seated pec deck' },
+          { id: 'c17', label: 'Standing cables' },
+          { id: 'c18', label: 'Dumbbell incline' },
+          { id: 'c19', label: 'Dumbbell flat' },
+        ]},
+        { name: 'Plate Press', items: [
+          { id: 'c20', label: '25 lb. flat close-grip' },
+          { id: 'c21', label: '25 lb. incline close-grip' },
+        ]},
+      ]
+    },
+    {
+      id: 'lats', name: 'LATS', icon: '💪',
+      groups: [
+        { name: 'Pulldowns', items: [
+          { id: 'l1', label: 'Cable wide-grip' },
+          { id: 'l2', label: 'Cable close-grip' },
+          { id: 'l3', label: 'Machine x2 arm' },
+          { id: 'l4', label: 'Machine x1 arm' },
+        ]},
+        { name: 'Pullovers', items: [
+          { id: 'l5', label: 'Dumbbell x1 bench back support — slow!' },
+        ]},
+        { name: 'Pullbacks', items: [
+          { id: 'l6', label: 'Cable standing close-grip' },
+        ]},
+        { name: 'Pull-ups', items: [
+          { id: 'l7', label: 'Wide-grip' },
+          { id: 'l8', label: 'Close-grip' },
+        ]},
+      ]
+    },
+    {
+      id: 'shoulders', name: 'SHOULDERS', icon: '🔝',
+      groups: [
+        { name: 'Press', items: [
+          { id: 's1', label: 'Dumbbell overhead' },
+          { id: 's2', label: 'Barbell overhead' },
+          { id: 's3', label: 'Machine wide-grip' },
+          { id: 's4', label: 'Machine close-grip' },
+        ]},
+        { name: 'Raises', items: [
+          { id: 's5', label: 'Lateral dumbbell — wide (seated or standing)' },
+          { id: 's6', label: 'Lateral dumbbell — front (seated or standing)' },
+        ]},
+        { name: 'Shrugs', items: [
+          { id: 's7', label: 'Dumbbell' },
+          { id: 's8', label: 'Cable pull-up' },
+        ]},
+        { name: 'Rear Deltoids', items: [
+          { id: 's9',  label: 'Cable Face Pull' },
+          { id: 's10', label: 'Machine reverse PeckDek' },
+        ]},
+      ]
+    },
+    {
+      id: 'back', name: 'BACK', icon: '🔙',
+      groups: [
+        { name: 'Rowing', items: [
+          { id: 'b1', label: 'Cable seated wide grip' },
+          { id: 'b2', label: 'Bench chest-supported incline' },
+          { id: 'b3', label: 'Machine seated wide grip' },
+          { id: 'b4', label: 'Inverted row machine' },
+        ]},
+      ]
+    },
+    {
+      id: 'biceps', name: 'BICEPS', icon: '💪', rightArm: true,
+      groups: [
+        { name: 'Curls', items: [
+          { id: 'bi1',  label: 'Dumbbell incline' },
+          { id: 'bi2',  label: 'Dumbbell standing' },
+          { id: 'bi3',  label: 'Barbell wide grip' },
+          { id: 'bi4',  label: 'Barbell wide-grip close-body' },
+          { id: 'bi5',  label: 'Barbell close grip' },
+          { id: 'bi6',  label: 'Dumbbell close-grip x1' },
+          { id: 'bi7',  label: 'Cable x1' },
+          { id: 'bi8',  label: 'Cable wide-grip close-body' },
+          { id: 'bi9',  label: 'Bench incline chest-supported' },
+          { id: 'bi10', label: '21 Guns Salute (x7x7x7)' },
+        ]},
+        { name: 'Hammer Curls', items: [
+          { id: 'bi11', label: 'Bench incline chest-supported (forward)' },
+          { id: 'bi12', label: 'Dumbbell incline (forward)' },
+          { id: 'bi13', label: 'Standing dumbbell (forward)' },
+          { id: 'bi14', label: 'Standing dumbbell (cross over)' },
+          { id: 'bi15', label: 'Cable rope x2' },
+        ]},
+        { name: 'Pull-up Curls', items: [
+          { id: 'bi16', label: 'Cable rope' },
+        ]},
+      ]
+    },
+    {
+      id: 'triceps', name: 'TRICEPS', icon: '💪', rightArm: true,
+      groups: [
+        { name: 'Presses', items: [
+          { id: 'tr1', label: 'Cable close-grip' },
+          { id: 'tr2', label: 'Cable rope' },
+          { id: 'tr3', label: 'Machine' },
+          { id: 'tr4', label: 'Barbell skull crushers' },
+        ]},
+        { name: 'Extensions', items: [
+          { id: 'tr5', label: 'Cable rope overhead' },
+          { id: 'tr6', label: 'Standing overhead 25lb plate' },
+          { id: 'tr7', label: 'Bench chest-supported flat x1' },
+          { id: 'tr8', label: 'Standing overhead dumbbell' },
+        ]},
+        { name: 'Cable Pushdowns', items: [
+          { id: 'tr9', label: 'Angled bar' },
+        ]},
+      ]
+    },
+    {
+      id: 'forearms', name: 'FOREARMS', icon: '🤜', rightArm: true,
+      groups: [
+        { name: 'Curls', items: [
+          { id: 'fa1', label: 'Dumbbell' },
+          { id: 'fa2', label: 'Barbell' },
+          { id: 'fa3', label: 'Cable' },
+          { id: 'fa4', label: 'Dumbbell (alt)' },
+        ]},
+        { name: 'Roll-ups', items: [
+          { id: 'fa5', label: 'Grip w/ strap' },
+        ]},
+      ]
+    },
+    {
+      id: 'cardio', name: 'CARDIO', icon: '🏃',
+      groups: [
+        { name: 'Treadmill', items: [
+          { id: 'cd1', label: 'Hit Run',      timed: true },
+          { id: 'cd2', label: 'Incline Hike', timed: true },
+          { id: 'cd3', label: 'Power Walk',   timed: true },
+        ]},
+        { name: 'Cycling', items: [
+          { id: 'cd4', label: 'Hit Ride', timed: true },
+        ]},
+        { name: 'Rowing', items: [
+          { id: 'cd5', label: 'Hit Row', timed: true },
+        ]},
+      ]
+    },
+    {
+      id: 'stretching', name: 'STRETCHING', icon: '🧘',
+      groups: [
+        { name: '', items: [
+          { id: 'st1', label: 'Cossack Squats (Patrick DiBello)' },
+          { id: 'st2', label: '3 Exercises Over 50 (Patrick DiBello)' },
+        ]},
+      ]
+    },
+  ],
+
+  legsCore: [
+    {
+      id: 'warmup', name: 'WARM UP / COOL DOWN', icon: '🚶',
+      groups: [
+        { name: '', items: [
+          { id: 'wu1', label: 'Treadmill Warmup Walk (5–10 min)',   timed: true },
+          { id: 'wu2', label: 'Treadmill Cooldown Walk (5–10 min)', timed: true },
+        ]},
+      ]
+    },
+    {
+      id: 'legs', name: 'LEGS + GLUTES', icon: '🦵',
+      groups: [
+        { name: 'Leg Presses', items: [
+          { id: 'lg1',  label: 'Machine incline seated x2 leg' },
+          { id: 'lg2',  label: 'Machine incline seated x1 leg' },
+          { id: 'lg3',  label: 'Machine reg x2 leg' },
+          { id: 'lg4',  label: 'Machine reg seated x1 leg' },
+        ]},
+        { name: 'Leg Extensions', items: [
+          { id: 'lg5',  label: 'Machine forward seated x2 — Leg Extension' },
+          { id: 'lg6',  label: 'Machine reverse seated x2 — Seated Leg Curl' },
+        ]},
+        { name: 'Squats', items: [
+          { id: 'lg7',  label: 'Machine w/ plates standing x2 leg' },
+          { id: 'lg8',  label: 'Smith' },
+          { id: 'lg9',  label: 'Dumbbells' },
+          { id: 'lg10', label: 'Tapbar Deadlift' },
+        ]},
+        { name: 'Calfs', items: [
+          { id: 'lg11', label: 'w/ Leg Press' },
+          { id: 'lg12', label: 'Machine' },
+          { id: 'lg13', label: 'Dumbbell' },
+        ]},
+        { name: 'Glutes', items: [
+          { id: 'lg14', label: 'Glute Back Press machine' },
+        ]},
+        { name: 'Hip Abduction', items: [
+          { id: 'lg15', label: 'Machine — push legs OUT' },
+          { id: 'lg16', label: 'Machine — push legs IN' },
+          { id: 'lg17', label: 'Hip Thrust' },
+        ]},
+        { name: 'Misc', items: [
+          { id: 'lg18', label: 'Walk around w/ 25 lb kettle/plates' },
+        ]},
+      ]
+    },
+    {
+      id: 'core', name: 'ABS + CORE', icon: '🔥',
+      groups: [
+        { name: 'TRX', items: [
+          { id: 'co1', label: 'Squat Row' },
+          { id: 'co2', label: 'Quad stretch' },
+          { id: 'co3', label: 'Misc' },
+        ]},
+        { name: 'Crunches', items: [
+          { id: 'co4',  label: 'Bench decline #1 (x50–75)' },
+          { id: 'co5',  label: '"Total Gym" Elevate Core ADJ' },
+          { id: 'co6',  label: 'Cable rope' },
+          { id: 'co7',  label: 'Rotations cable' },
+          { id: 'co8',  label: 'Machine pull down' },
+          { id: 'co9',  label: 'Mat' },
+          { id: 'co10', label: 'Mat side ankle touch' },
+        ]},
+        { name: 'Leg Raises', items: [
+          { id: 'co11', label: 'Hanging' },
+          { id: 'co12', label: 'Lying down' },
+        ]},
+        { name: 'BOSU Balance Ball', items: [
+          { id: 'co13', label: 'Balance 2 leg' },
+          { id: 'co14', label: 'Squats 2 leg' },
+        ]},
+        { name: 'Ab Machines', items: [
+          { id: 'co15', label: 'AbCoaster machine' },
+        ]},
+        { name: 'Core Videos', items: [
+          { id: 'co16', label: 'Zeus Fitness: Six Pack Abs v.1 — Part 1' },
+          { id: 'co17', label: 'Zeus Fitness: Six Pack Abs v.1 — Part 2' },
+          { id: 'co18', label: 'Zeus Fitness: Six Pack Abs v.2' },
+          { id: 'co19', label: 'Brian Klepacki (isometric)' },
+          { id: 'co20', label: 'Kevin Clark' },
+          { id: 'co21', label: 'Just Stretch' },
+        ]},
+      ]
+    },
+  ]
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+
+const KEY     = 'wl26';
+const KEY_COL = 'wl26_col';
+const KEY_EX  = 'wl26_ex';
+
+let currentDate      = getDefaultDate();
+let state            = {};
+let collapsed        = {};
+let customExercises  = null;
+let editMode         = false;
+let modal            = null;
+
+function getDefaultDate() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay();
+  if (day === 0) d.setDate(d.getDate() - 2);
+  if (day === 6) d.setDate(d.getDate() - 1);
+  return d;
+}
+
+function loadState() {
+  try { state           = JSON.parse(localStorage.getItem(KEY))     || {}; } catch(e) { state = {}; }
+  try { collapsed       = JSON.parse(localStorage.getItem(KEY_COL)) || {}; } catch(e) { collapsed = {}; }
+  try { const r = localStorage.getItem(KEY_EX); if (r) customExercises = JSON.parse(r); } catch(e) {}
+}
+
+function saveState()          { localStorage.setItem(KEY,     JSON.stringify(state)); }
+function saveCollapsed()      { localStorage.setItem(KEY_COL, JSON.stringify(collapsed)); }
+function saveCustomExercises(){ localStorage.setItem(KEY_EX,  JSON.stringify(customExercises)); }
+
+function getExercises() { return customExercises || EXERCISES; }
+
+function ensureCustomExercises() {
+  if (!customExercises) customExercises = JSON.parse(JSON.stringify(EXERCISES));
+}
+
+function dateKey(d) { return d.toISOString().slice(0, 10); }
+
+function getDayState(d) {
+  const k = dateKey(d);
+  if (!state[k]) state[k] = { checked: {}, times: {} };
+  if (!state[k].times) state[k].times = {};
+  return state[k];
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+
+function getMonday(d) {
+  const date = new Date(d);
+  const day  = date.getDay();
+  date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function getWeekDays(d) {
+  const mon = getMonday(d);
+  return Array.from({ length: 5 }, (_, i) => {
+    const day = new Date(mon);
+    day.setDate(day.getDate() + i);
+    return day;
+  });
+}
+
+function getWorkoutType(d) {
+  const day = d.getDay();
+  if ([1, 3, 5].includes(day)) return 'fullBody';
+  if ([2, 4].includes(day))    return 'legsCore';
+  return null;
+}
+
+function hasAnyProgress(d) {
+  const ds = getDayState(d);
+  return Object.values(ds.checked || {}).some(Boolean);
+}
+
+function getProgress(type, d) {
+  const ds = getDayState(d);
+  let total = 0, done = 0;
+  getExercises()[type].forEach(sec =>
+    sec.groups.forEach(g =>
+      g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
+    )
+  );
+  return { done, total };
+}
+
+function getSectionProgress(secId, type, d) {
+  const ds  = getDayState(d);
+  const sec = getExercises()[type].find(s => s.id === secId);
+  if (!sec) return { done: 0, total: 0 };
+  let total = 0, done = 0;
+  sec.groups.forEach(g =>
+    g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
+  );
+  return { done, total };
+}
+
+// ─────────────────────────────────────────────
+// ACTIONS — CHECKLIST
+// ─────────────────────────────────────────────
+
+function toggleExercise(id) {
+  const ds = getDayState(currentDate);
+  if (ds.checked[id]) { delete ds.checked[id]; delete ds.times[id]; }
+  else { ds.checked[id] = true; }
+  saveState();
+  render();
+}
+
+function adjustTime(id, delta) {
+  const ds = getDayState(currentDate);
+  const cur = ds.times[id] || 0;
+  ds.times[id] = Math.max(0, Math.min(120, cur + delta));
+  saveState();
+  const el = document.querySelector(`[data-time="${id}"]`);
+  if (el) el.textContent = ds.times[id] > 0 ? ds.times[id] + 'm' : '—';
+}
+
+function switchDay(iso) {
+  currentDate = new Date(iso + 'T00:00:00');
+  render();
+}
+
+function toggleSection(id) {
+  const isCollapsed = collapsed[id] !== false;
+  collapsed[id] = !isCollapsed;
+  saveCollapsed();
+  render();
+}
+
+function expandAll() {
+  const type = getWorkoutType(currentDate);
+  if (!type) return;
+  getExercises()[type].forEach(s => { collapsed[s.id] = false; });
+  saveCollapsed();
+  render();
+}
+
+function collapseAll() {
+  const type = getWorkoutType(currentDate);
+  if (!type) return;
+  getExercises()[type].forEach(s => { collapsed[s.id] = true; });
+  saveCollapsed();
+  render();
+}
+
+// ─────────────────────────────────────────────
+// ACTIONS — EDIT MODE
+// ─────────────────────────────────────────────
+
+function toggleEditMode() {
+  editMode = !editMode;
+  modal = null;
+  render();
+}
+
+function openAddModal(workoutType, sectionId, groupName) {
+  modal = { type: 'add', workoutType, sectionId, groupName };
+  render();
+  setTimeout(() => { const i = document.getElementById('modal-input'); if (i) i.focus(); }, 50);
+}
+
+function openEditModal(id, workoutType, sectionId, label) {
+  modal = { type: 'editEx', id, workoutType, sectionId, label };
+  render();
+  setTimeout(() => { const i = document.getElementById('modal-input'); if (i) { i.focus(); i.select(); } }, 50);
+}
+
+function deleteExerciseDirect(id, workoutType, sectionId) {
+  ensureCustomExercises();
+  const sec = customExercises[workoutType].find(s => s.id === sectionId);
+  if (sec) { sec.groups.forEach(g => { g.items = g.items.filter(i => i.id !== id); }); }
+  saveCustomExercises();
+  render();
+}
+
+function saveModalEdit() {
+  const input = document.getElementById('modal-input');
+  const val = input ? input.value.trim() : '';
+  if (!val) return;
+
+  if (modal.type === 'editEx') {
+    ensureCustomExercises();
+    const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+    if (sec) {
+      sec.groups.forEach(g => {
+        const item = g.items.find(i => i.id === modal.id);
+        if (item) item.label = val;
+      });
+      saveCustomExercises();
+    }
+  } else if (modal.type === 'add') {
+    ensureCustomExercises();
+    const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+    if (sec) {
+      const group = sec.groups.find(g => g.name === modal.groupName);
+      if (group) group.items.push({ id: 'u' + Date.now(), label: val });
+      saveCustomExercises();
+    }
+  }
+  modal = null;
+  render();
+}
+
+// ─────────────────────────────────────────────
+// ACTIONS — MODALS
+// ─────────────────────────────────────────────
+
+function closeModal()   { modal = null; render(); }
+function confirmReset() { modal = { type: 'reset' }; render(); }
+
+function doReset() {
+  getWeekDays(currentDate).forEach(d => delete state[dateKey(d)]);
+  saveState();
+  modal = null;
+  render();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+
+const DAY_LETTERS = ['M','T','W','T','F'];
+
+function renderWeekTabs() {
+  return getWeekDays(currentDate).map((d, i) => {
+    const active      = dateKey(d) === dateKey(currentDate);
+    const hasProgress = hasAnyProgress(d);
+    const cls = ['day-tab', active ? 'active' : '', (!active && hasProgress) ? 'has-progress' : '']
+      .filter(Boolean).join(' ');
+    return `<button class="${cls}" onclick="switchDay('${dateKey(d)}')">
+      <span class="day-letter">${DAY_LETTERS[i]}</span>
+      <span class="day-num">${d.getDate()}</span>
+      <span class="day-dot"></span>
+    </button>`;
+  }).join('');
+}
+
+function renderExercise(item, ds, workoutType, sectionId) {
+  if (editMode) {
+    return `<div class="exercise-item" style="cursor:default">
+      <button class="delete-btn" onclick="deleteExerciseDirect('${item.id}','${workoutType}','${sectionId}')">✕</button>
+      <span class="exercise-label" style="cursor:pointer" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">${esc(item.label)}</span>
+      <span style="color:var(--dim);font-size:13px;flex-shrink:0" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">✎</span>
+    </div>`;
+  }
+
+  const checked = !!ds.checked[item.id];
+  const time    = ds.times[item.id] || 0;
+
+  const doneDays = getWeekDays(currentDate).filter(d => {
+    if (dateKey(d) === dateKey(currentDate)) return false;
+    return !!state[dateKey(d)]?.checked?.[item.id];
+  });
+  const badgesHtml = doneDays.length
+    ? `<div class="day-badges">${doneDays.map(d => `<span class="day-badge">${DAY_LETTERS[d.getDay()-1]}</span>`).join('')}</div>`
+    : '';
+
+  let timeHtml = '';
+  if (item.timed && checked) {
+    timeHtml = `<div class="time-controls" onclick="event.stopPropagation()">
+      <button class="time-btn" onclick="adjustTime('${item.id}',-5)">−</button>
+      <span class="time-display" data-time="${item.id}">${time > 0 ? time + 'm' : '—'}</span>
+      <button class="time-btn" onclick="adjustTime('${item.id}',5)">+</button>
+    </div>`;
+  }
+
+  return `<div class="exercise-item${checked ? ' checked' : ''}" onclick="toggleExercise('${item.id}')">
+    <div class="checkbox"><span class="checkmark">✓</span></div>
+    <span class="exercise-label">${esc(item.label)}</span>
+    ${badgesHtml}
+    ${timeHtml}
+  </div>`;
+}
+
+function renderSection(sec, type) {
+  const ds          = getDayState(currentDate);
+  const isCollapsed = collapsed[sec.id] !== false;
+  const { done, total } = getSectionProgress(sec.id, type, currentDate);
+  const complete    = done === total && total > 0;
+
+  const headerCls  = `section-header${isCollapsed ? '' : ' open'}`;
+  const countCls   = `section-count${complete ? ' complete' : ''}`;
+  const chevronCls = `chevron${isCollapsed ? '' : ' open'}`;
+
+  let body = '';
+  if (!isCollapsed) {
+    const noteHtml = sec.rightArm
+      ? `<div class="section-note">⚡ Add extra unilateral set — right side (Jim Delgado)</div>`
+      : '';
+    const groupsHtml = sec.groups.map(g => {
+      const label   = g.name ? `<div class="group-label">${g.name}</div>` : '';
+      const items   = g.items.map(item => renderExercise(item, ds, type, sec.id)).join('');
+      const addBtn  = editMode
+        ? `<button class="add-exercise-btn" onclick="openAddModal('${type}','${sec.id}',${JSON.stringify(g.name)})">＋ Add to ${g.name || sec.name}</button>`
+        : '';
+      return label + items + addBtn;
+    }).join('');
+    body = `${noteHtml}<div class="section-body">${groupsHtml}</div>`;
+  }
+
+  return `<div class="section">
+    <div class="${headerCls}" onclick="toggleSection('${sec.id}')">
+      <div class="section-left">
+        <span class="section-icon">${sec.icon}</span>
+        <span class="section-name">${sec.name}</span>
+      </div>
+      <div class="section-right">
+        ${editMode ? '' : `<span class="${countCls}">${done}/${total}</span>`}
+        <span class="${chevronCls}">▾</span>
+      </div>
+    </div>
+    ${body}
+  </div>`;
+}
+
+function renderModal() {
+  if (!modal) return '';
+  if (modal.type === 'reset') {
+    return `<div class="modal-overlay">
+      <div class="modal">
+        <h3>Start New Week?</h3>
+        <p>This clears all checked exercises for the entire week. Ready to reset?</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel"  onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="doReset()">Clear &amp; Reset</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'editEx') {
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Edit Exercise</h3>
+        <input id="modal-input" class="modal-input" type="text" value="${esc(modal.label)}" placeholder="Exercise name">
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveModalEdit()">Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'add') {
+    const groupLabel = modal.groupName || 'section';
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Add Exercise</h3>
+        <p style="margin-bottom:14px">Adding to: <strong>${esc(groupLabel)}</strong></p>
+        <input id="modal-input" class="modal-input" type="text" placeholder="Exercise name">
+        <div class="modal-actions">
+          <button class="modal-btn cancel"  onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveModalEdit()">Add</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+function render() {
+  const type = getWorkoutType(currentDate);
+
+  const editBtn = type
+    ? `<button class="edit-toggle${editMode ? ' active' : ''}" onclick="toggleEditMode()">${editMode ? 'Done' : '✎ Edit'}</button>`
+    : '';
+
+  let headerMeta = '';
+  if (type) {
+    const { done, total } = getProgress(type, currentDate);
+    const pct   = total ? Math.round((done / total) * 100) : 0;
+    const label = type === 'fullBody' ? '🏋🏽 FULL BODY' : '🦵 LEGS & CORE';
+    const days  = type === 'fullBody' ? 'MON · WED · FRI' : 'TUE · THU';
+    headerMeta = `
+    <div class="workout-meta">
+      <div>
+        <div class="workout-type">${label}</div>
+        <div class="workout-days">${days}</div>
+      </div>
+      ${editMode ? '' : `<div class="workout-progress">
+        <div class="progress-label"><strong>${done}</strong> / ${total} done</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>`}
+    </div>
+    ${editMode ? '' : `<div class="expand-btns">
+      <button class="expand-btn" onclick="expandAll()">▾ Expand All</button>
+      <button class="expand-btn" onclick="collapseAll()">▸ Collapse All</button>
+    </div>`}`;
+  }
+
+  const content = type
+    ? getExercises()[type].map(s => renderSection(s, type)).join('')
+    : `<div class="rest-day">
+        <div class="rest-icon">💤</div>
+        <div class="rest-title">Rest Day</div>
+        <div class="rest-sub">No workout scheduled.<br>Tap a day above to review.</div>
+      </div>`;
+
+  document.getElementById('app').innerHTML = `
+    <div class="app-header">
+      <div class="app-title-row">
+        <div class="app-title">🏋🏽 Workout Log | 2026</div>
+        ${editBtn}
+      </div>
+      <div class="week-tabs">${renderWeekTabs()}</div>
+      ${headerMeta}
+    </div>
+    ${content}
+    <div class="app-footer">
+      <button class="reset-btn" onclick="confirmReset()">🗑&nbsp; NEW WEEK — CLEAR ALL</button>
+    </div>
+    ${renderModal()}
+  `;
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+
+loadState();
+render();
+</script>
+</body>
+</html>
