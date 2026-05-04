@@ -1,6 +1,19 @@
 # Workout Tracker Changelog
 
-## v3.0.1 — 2026-05-03
+## v3.4 — 2026-05-04
+- **Edit mode overhaul**: Drag handles (≡) to reorder sections, subheaders, and exercises
+- **Move exercise (⇄)**: Move any exercise to a different section or subheader via picker modal
+- **Delete sections & subheaders**: ✕ button with confirmation on section headers and subheaders
+- **Bug fix**: + Add Exercise button no longer breaks when group name contains quotes
+- **Import Backup**: 📂 Import Backup button in Settings restores all data from a JSON file — works on iOS, Android, and desktop
+- **Welcome popup**: Shows on first launch and after each update with version number and what's new
+- **Rest day UX**: If today is a rest day, a Settings link appears on screen to change it
+- **Sticky Settings buttons**: Cancel/Save always visible at bottom of Settings — no longer hidden by scrolling; transparent gap below buttons eliminated
+- **Centered input modals**: Add/Edit/Subheader modals now centered so iOS keyboard doesn't cover buttons
+- **Help updated**: New Editing Exercises section, device-agnostic install and backup instructions, PWA spelled out, Import Backup documented
+- **Export**: Clarified as platform-agnostic (iOS, Android, desktop)
+
+## v3.3.1 — 2026-05-04
 - **iPhone safe area fix**: Added `viewport-fit=cover` to viewport meta tag so `env(safe-area-inset-bottom)` actually applies — prevents START NEW WEEK button from being clipped by iPhone curved edges
 
 ## v3.0 — 2026-05-03

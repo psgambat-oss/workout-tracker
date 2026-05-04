@@ -319,6 +319,7 @@
     .rest-day .rest-icon  { font-size: 60px; }
     .rest-day .rest-title { font-size: 22px; font-weight: 800; }
     .rest-day .rest-sub   { font-size: 15px; color: var(--dim); line-height: 1.5; }
+    .rest-settings-link   { background: none; border: none; color: var(--accent); font-size: 15px; font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline; }
 
     /* ── FOOTER ── */
     .app-footer {
@@ -356,6 +357,10 @@
       align-items: flex-end;
       padding: 16px;
       padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+    .modal-overlay.centered {
+      align-items: center;
+      padding-bottom: 16px;
     }
 
     .modal {
@@ -465,7 +470,9 @@
     .stats-cell + .stats-cell { border-left: 1px solid var(--border); }
     .stats-label { font-size: 9px; color: var(--dim); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
     .stats-value { font-size: 14px; font-weight: 800; color: var(--text); margin-top: 1px; }
-    .sched-modal { max-height: 85vh; overflow-y: auto; }
+    .sched-modal { max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+    .sched-modal-body { flex: 1; overflow-y: auto; padding: 24px 24px 0; }
+    .sched-modal .modal-actions { flex-shrink: 0; padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); background: var(--card); box-shadow: 0 -12px 12px 4px var(--card); }
     .hist-modal  { max-height: 85vh; overflow-y: auto; }
     .hist-list   { display: flex; flex-direction: column; gap: 16px; }
     .hist-week   { background: var(--card2); border-radius: 10px; padding: 10px 12px; }
@@ -826,6 +833,9 @@ const KEY_SCHED  = 'wl26_sched';
 const KEY_DONE   = 'wl26_done';
 const KEY_HIST   = 'wl26_history';
 const KEY_PREFS  = 'wl26_prefs';
+const KEY_VER    = 'wl26_ver';
+
+const APP_VERSION = '3.4';
 
 // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 const DEFAULT_SCHEDULE = { 0: null, 1: 'fullBody', 2: 'legsCore', 3: 'fullBody', 4: 'legsCore', 5: 'fullBody', 6: null };
@@ -1154,10 +1164,141 @@ function _dragEnd(clientY) {
   }
   render();
 }
-document.addEventListener('touchmove', e => { if (drag) { e.preventDefault(); _dragMove(e.touches[0].clientY); } }, { passive: false });
-document.addEventListener('touchend',  e => { if (drag) _dragEnd(e.changedTouches[0].clientY); });
-document.addEventListener('mousemove', e => { if (drag) _dragMove(e.clientY); });
-document.addEventListener('mouseup',   e => { if (drag) _dragEnd(e.clientY); });
+
+// ── DRAG-TO-REORDER GROUPS ────────────────────
+let grpDrag = null;
+function startGroupDrag(e, type, secId, gIdx) {
+  e.preventDefault(); e.stopPropagation();
+  grpDrag = { type, secId, srcIdx: gIdx, overIdx: gIdx };
+  document.querySelector(`[data-group-idx="${gIdx}"][data-sec-id="${secId}"]`)?.classList.add('dragging');
+}
+function _grpDragMove(clientY) {
+  if (!grpDrag) return;
+  const els = [...document.querySelectorAll(`[data-group-idx][data-sec-id="${grpDrag.secId}"]`)];
+  let overIdx = grpDrag.srcIdx;
+  els.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (clientY > rect.top + rect.height / 2) overIdx = parseInt(el.dataset.groupIdx);
+  });
+  if (overIdx !== grpDrag.overIdx) {
+    els.forEach(el => el.classList.remove('drag-over'));
+    document.querySelector(`[data-group-idx="${overIdx}"][data-sec-id="${grpDrag.secId}"]`)?.classList.add('drag-over');
+    grpDrag.overIdx = overIdx;
+  }
+}
+function _grpDragEnd() {
+  if (!grpDrag) return;
+  const { type, secId, srcIdx, overIdx } = grpDrag;
+  grpDrag = null;
+  if (overIdx !== srcIdx) {
+    ensureCustomExercises();
+    const sec = customExercises[type].find(s => s.id === secId);
+    if (sec) { const [r] = sec.groups.splice(srcIdx, 1); sec.groups.splice(overIdx, 0, r); saveCustomExercises(); }
+  }
+  render();
+}
+
+// ── DRAG-TO-REORDER EXERCISES ─────────────────
+let exDrag = null;
+function startExerciseDrag(e, type, secId, gIdx, iIdx) {
+  e.preventDefault(); e.stopPropagation();
+  exDrag = { type, secId, gIdx, srcIdx: iIdx, overIdx: iIdx };
+  document.querySelector(`[data-item-idx="${iIdx}"][data-group-idx="${gIdx}"][data-sec-id="${secId}"]`)?.classList.add('dragging');
+}
+function _exDragMove(clientY) {
+  if (!exDrag) return;
+  const els = [...document.querySelectorAll(`[data-item-idx][data-group-idx="${exDrag.gIdx}"][data-sec-id="${exDrag.secId}"]`)];
+  let overIdx = exDrag.srcIdx;
+  els.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (clientY > rect.top + rect.height / 2) overIdx = parseInt(el.dataset.itemIdx);
+  });
+  if (overIdx !== exDrag.overIdx) {
+    els.forEach(el => el.classList.remove('drag-over'));
+    document.querySelector(`[data-item-idx="${overIdx}"][data-group-idx="${exDrag.gIdx}"][data-sec-id="${exDrag.secId}"]`)?.classList.add('drag-over');
+    exDrag.overIdx = overIdx;
+  }
+}
+function _exDragEnd() {
+  if (!exDrag) return;
+  const { type, secId, gIdx, srcIdx, overIdx } = exDrag;
+  exDrag = null;
+  if (overIdx !== srcIdx) {
+    ensureCustomExercises();
+    const sec = customExercises[type].find(s => s.id === secId);
+    const grp = sec?.groups[gIdx];
+    if (grp) { const [r] = grp.items.splice(srcIdx, 1); grp.items.splice(overIdx, 0, r); saveCustomExercises(); }
+  }
+  render();
+}
+
+// ── DELETE SECTION / GROUP ────────────────────
+function deleteSection(type, secId) {
+  modal = { type: 'confirmDeleteSection', workoutType: type, sectionId: secId };
+  render();
+}
+function doDeleteSection() {
+  ensureCustomExercises();
+  customExercises[modal.workoutType] = customExercises[modal.workoutType].filter(s => s.id !== modal.sectionId);
+  saveCustomExercises();
+  modal = null;
+  render();
+}
+function deleteGroup(type, secId, gIdx) {
+  modal = { type: 'confirmDeleteGroup', workoutType: type, sectionId: secId, groupIdx: gIdx };
+  render();
+}
+function dismissWelcome() {
+  localStorage.setItem(KEY_VER, APP_VERSION);
+  modal = null;
+  render();
+}
+function openMoveModal(workoutType, secId, gIdx, iIdx) {
+  modal = { type: 'moveEx', workoutType, sectionId: secId, groupIdx: gIdx, itemIdx: iIdx };
+  render();
+}
+function doMoveExercise(destSecId, destGIdx) {
+  ensureCustomExercises();
+  const { workoutType, sectionId, groupIdx, itemIdx } = modal;
+  const srcSec = customExercises[workoutType].find(s => s.id === sectionId);
+  const srcGrp = srcSec?.groups[groupIdx];
+  if (!srcGrp) { modal = null; render(); return; }
+  const [item] = srcGrp.items.splice(itemIdx, 1);
+  const destSec = customExercises[workoutType].find(s => s.id === destSecId);
+  const destGrp = destSec?.groups[destGIdx];
+  if (destGrp) destGrp.items.push(item);
+  saveCustomExercises();
+  modal = null;
+  render();
+}
+function doDeleteGroup() {
+  ensureCustomExercises();
+  const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+  if (sec) { sec.groups.splice(modal.groupIdx, 1); saveCustomExercises(); }
+  modal = null;
+  render();
+}
+
+document.addEventListener('touchmove', e => {
+  if (drag) { e.preventDefault(); _dragMove(e.touches[0].clientY); }
+  else if (grpDrag) { e.preventDefault(); _grpDragMove(e.touches[0].clientY); }
+  else if (exDrag)  { e.preventDefault(); _exDragMove(e.touches[0].clientY); }
+}, { passive: false });
+document.addEventListener('touchend', e => {
+  if (drag) _dragEnd(e.changedTouches[0].clientY);
+  else if (grpDrag) _grpDragEnd();
+  else if (exDrag)  _exDragEnd();
+});
+document.addEventListener('mousemove', e => {
+  if (drag) _dragMove(e.clientY);
+  else if (grpDrag) _grpDragMove(e.clientY);
+  else if (exDrag)  _exDragMove(e.clientY);
+});
+document.addEventListener('mouseup', e => {
+  if (drag) _dragEnd(e.clientY);
+  else if (grpDrag) _grpDragEnd();
+  else if (exDrag)  _exDragEnd();
+});
 
 function openSettings() { modal = { type: 'schedule', draft: Object.assign({}, schedule) }; render(); }
 function openHelp()     { modal = { type: 'help' }; render(); }
@@ -1270,6 +1411,47 @@ function exportData() {
   URL.revokeObjectURL(url);
 }
 
+function triggerImport() {
+  const input = document.getElementById('import-file-input');
+  if (input) { input.value = ''; input.click(); }
+}
+
+function readImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.version !== 'wl26') {
+        modal = { type: 'importError', message: 'This file doesn\'t look like a Workout Log backup.' };
+        render(); return;
+      }
+      const exportedAt = data.exportedAt ? new Date(data.exportedAt).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) : 'unknown date';
+      modal = { type: 'confirmImport', data, exportedAt };
+      render();
+    } catch(err) {
+      modal = { type: 'importError', message: 'Could not read the file. Make sure it\'s a valid JSON backup.' };
+      render();
+    }
+  };
+  reader.readAsText(file);
+}
+
+function doImport() {
+  const data = modal.data;
+  if (data.schedule)        localStorage.setItem(KEY_SCHED,  JSON.stringify(data.schedule));
+  if (data.state)           localStorage.setItem(KEY,        JSON.stringify(data.state));
+  if (data.completedDays)   localStorage.setItem(KEY_DONE,   JSON.stringify(data.completedDays));
+  if (data.workoutHistory)  localStorage.setItem(KEY_HIST,   JSON.stringify(data.workoutHistory));
+  if (data.customExercises) localStorage.setItem(KEY_EX,     JSON.stringify(data.customExercises));
+  if (data.prefs)           localStorage.setItem(KEY_PREFS,  JSON.stringify(data.prefs));
+  modal = null;
+  loadState();
+  currentDate = getDefaultDate();
+  render();
+}
+
 // ─────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────
@@ -1291,12 +1473,14 @@ function renderWeekTabs() {
   }).join('');
 }
 
-function renderExercise(item, ds, workoutType, sectionId) {
+function renderExercise(item, ds, workoutType, sectionId, gIdx, iIdx) {
   if (editMode) {
-    return `<div class="exercise-item" style="cursor:default">
+    return `<div class="exercise-item" style="cursor:default" data-item-idx="${iIdx}" data-group-idx="${gIdx}" data-sec-id="${sectionId}">
+      <span class="drag-handle" ontouchstart="startExerciseDrag(event,'${workoutType}','${sectionId}',${gIdx},${iIdx})" onmousedown="startExerciseDrag(event,'${workoutType}','${sectionId}',${gIdx},${iIdx})">≡</span>
       <button class="delete-btn" onclick="deleteExerciseDirect('${item.id}','${workoutType}','${sectionId}')">✕</button>
-      <span class="exercise-label" style="cursor:pointer" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">${esc(item.label)}</span>
-      <span style="color:var(--dim);font-size:13px;flex-shrink:0" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">✎</span>
+      <span class="exercise-label" style="cursor:pointer;flex:1" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">${esc(item.label)}</span>
+      <span style="color:var(--dim);font-size:13px;flex-shrink:0;margin-right:4px" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">✎</span>
+      <span style="color:var(--dim);font-size:15px;flex-shrink:0;padding:0 2px;cursor:pointer" title="Move to…" onclick="openMoveModal('${workoutType}','${sectionId}',${gIdx},${iIdx})">⇄</span>
     </div>`;
   }
 
@@ -1343,13 +1527,19 @@ function renderSection(sec, type, idx) {
     const noteHtml = sec.rightArm
       ? `<div class="section-note">⚡ Add extra unilateral set — right side (Jim Delgado)</div>`
       : '';
-    const groupsHtml = sec.groups.map(g => {
-      const label   = g.name ? `<div class="group-label">${g.name}</div>` : '';
-      const items   = g.items.map(item => renderExercise(item, ds, type, sec.id)).join('');
-      const addBtn  = editMode
-        ? `<button class="add-exercise-btn" onclick="openAddModal('${type}','${sec.id}',${JSON.stringify(g.name)})">＋ Add to ${g.name || sec.name}</button>`
+    const groupsHtml = sec.groups.map((g, gIdx) => {
+      const grpLabel = g.name
+        ? `<div class="group-label" style="${editMode ? 'display:flex;align-items:center;gap:6px;padding-right:8px' : ''}">
+            ${editMode ? `<span class="drag-handle" style="font-size:15px" ontouchstart="startGroupDrag(event,'${type}','${sec.id}',${gIdx})" onmousedown="startGroupDrag(event,'${type}','${sec.id}',${gIdx})">≡</span>` : ''}
+            <span style="flex:1">${g.name}</span>
+            ${editMode ? `<button class="delete-btn" style="width:20px;height:20px;font-size:11px;flex-shrink:0" onclick="deleteGroup('${type}','${sec.id}',${gIdx})">✕</button>` : ''}
+           </div>`
         : '';
-      return label + items + addBtn;
+      const items  = g.items.map((item, iIdx) => renderExercise(item, ds, type, sec.id, gIdx, iIdx)).join('');
+      const addBtn = editMode
+        ? `<button class="add-exercise-btn" onclick="openAddModal('${type}','${sec.id}',${esc(JSON.stringify(g.name))})">＋ Add to ${g.name || sec.name}</button>`
+        : '';
+      return `<div class="group-container" data-group-idx="${gIdx}" data-sec-id="${sec.id}">${grpLabel}${items}${addBtn}</div>`;
     }).join('');
     const addGroupBtn = editMode
       ? `<button class="add-exercise-btn" style="color:var(--dim);border-top:1px dashed var(--border)" onclick="openAddGroupModal('${type}','${sec.id}')">＋ Add Subheader</button>`
@@ -1364,7 +1554,7 @@ function renderSection(sec, type, idx) {
         <span class="section-name">${sec.name}</span>
       </div>
       <div class="section-right">
-        ${editMode ? '' : `<span class="${countCls}">${done}/${total}</span>`}
+        ${editMode ? `<button class="delete-btn" onclick="event.stopPropagation();deleteSection('${type}','${sec.id}')">✕</button>` : `<span class="${countCls}">${done}/${total}</span>`}
         <span class="${chevronCls}">▾</span>
       </div>
     </div>
@@ -1457,7 +1647,7 @@ function renderModal() {
     </div>`;
   }
   if (modal.type === 'editEx') {
-    return `<div class="modal-overlay" onclick="closeModal()">
+    return `<div class="modal-overlay centered" onclick="closeModal()">
       <div class="modal" onclick="event.stopPropagation()">
         <h3>Edit Exercise</h3>
         <input id="modal-input" class="modal-input" type="text" value="${esc(modal.label)}" placeholder="Exercise name">
@@ -1490,11 +1680,66 @@ function renderModal() {
       </div>
     </div>`;
   }
+  if (modal.type === 'confirmDeleteSection') {
+    const sec = getExercises()[modal.workoutType]?.find(s => s.id === modal.sectionId);
+    const name = sec ? sec.name : 'this section';
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Delete Section</h3>
+        <p>Delete <strong>${esc(name)}</strong> and all its exercises? This cannot be undone.</p>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn danger" onclick="doDeleteSection()">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'confirmDeleteGroup') {
+    const sec = getExercises()[modal.workoutType]?.find(s => s.id === modal.sectionId);
+    const grp = sec?.groups[modal.groupIdx];
+    const name = grp?.name || 'this subheader';
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Delete Subheader</h3>
+        <p>Delete <strong>${esc(name)}</strong> and all its exercises? This cannot be undone.</p>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn danger" onclick="doDeleteGroup()">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'moveEx') {
+    const { workoutType, sectionId, groupIdx, itemIdx } = modal;
+    const allSecs = getExercises()[workoutType] || [];
+    const srcSec  = allSecs.find(s => s.id === sectionId);
+    const item    = srcSec?.groups[groupIdx]?.items[itemIdx];
+    const itemName = item ? esc(item.label) : 'Exercise';
+    const destRows = allSecs.map(sec =>
+      sec.groups.map((g, gIdx) => {
+        const isSrc = sec.id === sectionId && gIdx === groupIdx;
+        const label = g.name ? `${sec.name} → ${g.name}` : sec.name;
+        return `<button class="modal-btn${isSrc ? ' cancel' : ' confirm'}" style="width:100%;margin-bottom:6px;font-size:13px;text-align:left;padding:10px 12px"
+          onclick="doMoveExercise('${sec.id}',${gIdx})"
+          ${isSrc ? 'disabled' : ''}>${esc(label)}${isSrc ? ' (current)' : ''}</button>`;
+      }).join('')
+    ).join('');
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()" style="max-height:75vh;display:flex;flex-direction:column">
+        <h3>Move Exercise</h3>
+        <p style="margin-bottom:12px;font-size:13px;color:var(--dim)"><strong>${itemName}</strong> → move to:</p>
+        <div style="overflow-y:auto;flex:1">${destRows}</div>
+        <div class="modal-actions" style="margin-top:12px">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'addGroup') {
     const types = modal.workoutType === 'combined' ? ['fullBody','legsCore'] : [modal.workoutType];
     let secName = modal.sectionId;
     for (const t of types) { const s = getExercises()[t]?.find(s => s.id === modal.sectionId); if (s) { secName = s.name; break; } }
-    return `<div class="modal-overlay" onclick="closeModal()">
+    return `<div class="modal-overlay centered" onclick="closeModal()">
       <div class="modal" onclick="event.stopPropagation()">
         <h3>Add Subheader</h3>
         <p style="margin-bottom:14px">Adding to: <strong>${esc(secName)}</strong></p>
@@ -1507,7 +1752,7 @@ function renderModal() {
     </div>`;
   }
   if (modal.type === 'addSection') {
-    return `<div class="modal-overlay" onclick="closeModal()">
+    return `<div class="modal-overlay centered" onclick="closeModal()">
       <div class="modal" onclick="event.stopPropagation()">
         <h3>Add Section</h3>
         <input id="modal-input" class="modal-input" type="text" placeholder="Section name (e.g. CALVES)">
@@ -1515,6 +1760,25 @@ function renderModal() {
           <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
           <button class="modal-btn confirm" onclick="saveNewSection()">Add</button>
         </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'welcome') {
+    return `<div class="modal-overlay centered" onclick="event.stopPropagation()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>👋 Welcome to Workout Log</h3>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:4px">Version ${APP_VERSION}</p>
+        <div style="font-size:14px;line-height:1.7;margin-bottom:18px">
+          <p style="margin-bottom:10px">Here's what's new:</p>
+          <ul style="padding-left:18px;margin:0;color:var(--dim)">
+            <li>Reorder sections, subheaders &amp; exercises by dragging ≡</li>
+            <li>Move an exercise to any section via ⇄</li>
+            <li>Delete sections and subheaders with ✕</li>
+            <li>Rest day now links directly to Settings</li>
+          </ul>
+        </div>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:18px">Start by tapping today's day tab at the top, then check off exercises as you go. Tap <strong>Finish</strong> when done.</p>
+        <button class="modal-btn confirm" style="width:100%" onclick="dismissWelcome()">Let's Go</button>
       </div>
     </div>`;
   }
@@ -1544,15 +1808,25 @@ function renderModal() {
           <div class="help-section-hdr">Settings ⚙︎</div>
           <div class="help-row"><span class="help-key">Schedule</span><span class="help-val">Set each day to a workout type or Rest</span></div>
           <div class="help-row"><span class="help-key">Weekly Stats</span><span class="help-val">Off / After Finish / Always — controls the stats card in the header</span></div>
-          <div class="help-row"><span class="help-key">Edit Exercises</span><span class="help-val">Add, rename, delete, or reorder exercises and sections</span></div>
+          <div class="help-row"><span class="help-key">Edit Exercises</span><span class="help-val">Add, rename, delete, or reorder exercises, sections, and subheaders</span></div>
           <div class="help-row"><span class="help-key">History</span><span class="help-val">View archived weeks with per-day completion stats</span></div>
         </div>
 
         <div class="help-section">
+          <div class="help-section-hdr">Editing Exercises</div>
+          <div class="help-row"><span class="help-key">≡ Drag</span><span class="help-val">Reorder exercises, subheaders, or sections by dragging the ≡ handle</span></div>
+          <div class="help-row"><span class="help-key">⇄ Move</span><span class="help-val">Move an exercise to a different section or subheader</span></div>
+          <div class="help-row"><span class="help-key">✕ Delete</span><span class="help-val">Remove an exercise, subheader, or entire section (with confirmation)</span></div>
+          <div class="help-row"><span class="help-key">✎ Rename</span><span class="help-val">Tap the pencil or exercise name to rename it</span></div>
+          <div class="help-row"><span class="help-key">Rest day</span><span class="help-val">If today is a rest day, tap the Settings link shown on screen to change it</span></div>
+        </div>
+
+        <div class="help-section">
           <div class="help-section-hdr">Data Backup</div>
-          <div class="help-row"><span class="help-key">Export Now</span><span class="help-val">Saves all your data as a JSON file to Files/iCloud</span></div>
+          <div class="help-row"><span class="help-key">Export Now</span><span class="help-val">Saves all your data as a JSON file — works on iOS, Android, and desktop</span></div>
+          <div class="help-row"><span class="help-key">Import Backup</span><span class="help-val">Restores all data from a JSON backup. After reinstalling: open Settings → 📂 Import Backup, pick your file, tap Restore.</span></div>
           <div class="help-row"><span class="help-key">Auto-Export</span><span class="help-val">Automatically exports after every Finish — keep this ON</span></div>
-          <div class="help-row"><span class="help-key">Reinstalling</span><span class="help-val">Wipes all data. Always export first before reinstalling.</span></div>
+          <div class="help-row"><span class="help-key">Reinstalling</span><span class="help-val">Wipes all data. Always export a backup first, then use Import Backup after reinstalling to restore everything.</span></div>
         </div>
 
         <div class="help-section">
@@ -1582,37 +1856,41 @@ function renderModal() {
     }).join('');
     return `<div class="modal-overlay" onclick="closeModal()">
       <div class="modal sched-modal" onclick="event.stopPropagation()">
-        <h3>⚙︎ Settings</h3>
+        <div class="sched-modal-body">
+          <h3>⚙︎ Settings</h3>
 
-        <div class="settings-section">
-          <div class="settings-section-hdr">📅 Workout Schedule</div>
-          <div class="sched-list">${rows}</div>
-        </div>
-
-        <div class="settings-section">
-          <div class="settings-section-hdr">📊 Weekly Stats</div>
-          <div class="settings-seg">
-            <span onclick="setStatsMode('off')" style="${statsMode==='off'?'background:rgba(255,107,0,0.2);color:var(--accent)':'color:var(--dim)'}">Off</span>
-            <span onclick="setStatsMode('auto')" style="${statsMode==='auto'?'background:rgba(48,209,88,0.15);color:var(--green)':'color:var(--dim)'}">After Finish</span>
-            <span onclick="setStatsMode('always')" style="${statsMode==='always'?'background:rgba(48,209,88,0.15);color:var(--green)':'color:var(--dim)'}">Always</span>
+          <div class="settings-section">
+            <div class="settings-section-hdr">📅 Workout Schedule</div>
+            <div class="sched-list">${rows}</div>
           </div>
-        </div>
 
-        <div class="settings-section">
-          <div class="settings-section-hdr">🛠 Tools</div>
-          <div class="settings-tools">
-            <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit Exercises</button>
-            <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
-          </div>
-          <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="openHelp()">❓ Help</button>
-          <div class="export-row">
-            <div class="export-row-info">
-              <span class="export-row-label">Auto-Export on Finish</span>
-              <span class="export-row-sub">Saves JSON backup to Files after each workout</span>
+          <div class="settings-section">
+            <div class="settings-section-hdr">📊 Weekly Stats</div>
+            <div class="settings-seg">
+              <span onclick="setStatsMode('off')" style="${statsMode==='off'?'background:rgba(255,107,0,0.2);color:var(--accent)':'color:var(--dim)'}">Off</span>
+              <span onclick="setStatsMode('auto')" style="${statsMode==='auto'?'background:rgba(48,209,88,0.15);color:var(--green)':'color:var(--dim)'}">After Finish</span>
+              <span onclick="setStatsMode('always')" style="${statsMode==='always'?'background:rgba(48,209,88,0.15);color:var(--green)':'color:var(--dim)'}">Always</span>
             </div>
-            <button class="export-toggle${autoExport ? ' on' : ''}" onclick="toggleAutoExport()">${autoExport ? 'ON' : 'OFF'}</button>
           </div>
-          <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="exportData()">⬇ Export Data Now</button>
+
+          <div class="settings-section">
+            <div class="settings-section-hdr">🛠 Tools</div>
+            <div class="settings-tools">
+              <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit Exercises</button>
+              <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
+            </div>
+            <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="openHelp()">❓ Help</button>
+            <div class="export-row">
+              <div class="export-row-info">
+                <span class="export-row-label">Auto-Export on Finish</span>
+                <span class="export-row-sub">Saves JSON backup to Files after each workout</span>
+              </div>
+              <button class="export-toggle${autoExport ? ' on' : ''}" onclick="toggleAutoExport()">${autoExport ? 'ON' : 'OFF'}</button>
+            </div>
+            <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="exportData()">⬇ Export Data Now</button>
+            <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="triggerImport()">📂 Import Backup</button>
+            <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="readImportFile(this)">
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -1622,9 +1900,34 @@ function renderModal() {
       </div>
     </div>`;
   }
+  if (modal.type === 'confirmImport') {
+    return `<div class="modal-overlay centered" onclick="event.stopPropagation()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>📂 Restore Backup?</h3>
+        <p>This will replace <strong>all</strong> current data with the backup from:</p>
+        <p style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:6px">${modal.exportedAt}</p>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:20px">Your schedule, history, exercises, and preferences will all be restored. This cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="doImport()">Restore</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'importError') {
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>⚠️ Import Failed</h3>
+        <p>${modal.message}</p>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="modal-btn confirm" onclick="closeModal()">OK</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'add') {
     const groupLabel = modal.groupName || 'section';
-    return `<div class="modal-overlay" onclick="closeModal()">
+    return `<div class="modal-overlay centered" onclick="closeModal()">
       <div class="modal" onclick="event.stopPropagation()">
         <h3>Add Exercise</h3>
         <p style="margin-bottom:14px">Adding to: <strong>${esc(groupLabel)}</strong></p>
@@ -1705,10 +2008,14 @@ function render() {
     content = getExercises()[type].map((s, i) => renderSection(s, type, i)).join('') +
       (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '');
   } else {
+    const isToday = dateKey(currentDate) === dateKey(new Date());
     content = `<div class="rest-day">
         <div class="rest-icon">💤</div>
         <div class="rest-title">Rest Day</div>
-        <div class="rest-sub">No workout scheduled.<br>Tap a day above to review.</div>
+        ${isToday
+          ? `<div class="rest-sub">No workout scheduled for today.<br>Want to work out? Change today's type in <button class="rest-settings-link" onclick="openSettings()">⚙︎ Settings</button></div>`
+          : `<div class="rest-sub">No workout scheduled.<br>Tap a day above to review.</div>`
+        }
       </div>`;
   }
 
@@ -1743,6 +2050,13 @@ function render() {
 
 loadState();
 currentDate = getDefaultDate();
+
+// Show welcome modal if version changed (first launch or app update)
+const lastVer = localStorage.getItem(KEY_VER);
+if (lastVer !== APP_VERSION) {
+  modal = { type: 'welcome' };
+}
+
 render();
 </script>
 </body>
