@@ -1093,6 +1093,20 @@ function confirmResetStep2() { modal = { type: 'resetStep2' }; render(); }
 
 // ── ADD SECTION ───────────────────────────────
 function openAddSectionModal(type) { modal = { type: 'addSection', workoutType: type }; render(); }
+function openAddGroupModal(workoutType, sectionId) {
+  modal = { type: 'addGroup', workoutType, sectionId };
+  render();
+  setTimeout(() => { const i = document.getElementById('modal-input'); if (i) i.focus(); }, 50);
+}
+function saveNewGroup() {
+  const val = document.getElementById('modal-input')?.value.trim();
+  if (!val) return;
+  ensureCustomExercises();
+  const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+  if (sec) { sec.groups.push({ name: val, items: [] }); saveCustomExercises(); }
+  modal = null;
+  render();
+}
 function saveNewSection() {
   const val = document.getElementById('modal-input')?.value.trim().toUpperCase();
   if (!val) return;
@@ -1337,7 +1351,10 @@ function renderSection(sec, type, idx) {
         : '';
       return label + items + addBtn;
     }).join('');
-    body = `${noteHtml}<div class="section-body">${groupsHtml}</div>`;
+    const addGroupBtn = editMode
+      ? `<button class="add-exercise-btn" style="color:var(--dim);border-top:1px dashed var(--border)" onclick="openAddGroupModal('${type}','${sec.id}')">＋ Add Subheader</button>`
+      : '';
+    body = `${noteHtml}<div class="section-body">${groupsHtml}${addGroupBtn}</div>`;
   }
 
   return `<div class="section" data-sec-idx="${idx}" data-sec-type="${type}">
@@ -1473,6 +1490,22 @@ function renderModal() {
       </div>
     </div>`;
   }
+  if (modal.type === 'addGroup') {
+    const types = modal.workoutType === 'combined' ? ['fullBody','legsCore'] : [modal.workoutType];
+    let secName = modal.sectionId;
+    for (const t of types) { const s = getExercises()[t]?.find(s => s.id === modal.sectionId); if (s) { secName = s.name; break; } }
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Add Subheader</h3>
+        <p style="margin-bottom:14px">Adding to: <strong>${esc(secName)}</strong></p>
+        <input id="modal-input" class="modal-input" type="text" placeholder="Subheader name (e.g. Cable Press)">
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveNewGroup()">Add</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'addSection') {
     return `<div class="modal-overlay" onclick="closeModal()">
       <div class="modal" onclick="event.stopPropagation()">
@@ -1495,7 +1528,7 @@ function renderModal() {
         <div class="help-section">
           <div class="help-section-hdr">Daily Use</div>
           <div class="help-row"><span class="help-key">Check off</span><span class="help-val">Tap any exercise to check it. Tap again to uncheck.</span></div>
-          <div class="help-row"><span class="help-key">☐ Finish</span><span class="help-val">Marks your workout complete for the day. Shows a summary and triggers auto-export if enabled.</span></div>
+          <div class="help-row"><span class="help-key">Finish</span><span class="help-val">Marks your workout complete for the day. Shows a summary and triggers auto-export if enabled.</span></div>
           <div class="help-row"><span class="help-key">✓ Complete</span><span class="help-val">Already finished — tap to review your summary.</span></div>
           <div class="help-row"><span class="help-key">Cardio timer</span><span class="help-val">Check a timed exercise, then use +/− to log minutes.</span></div>
         </div>

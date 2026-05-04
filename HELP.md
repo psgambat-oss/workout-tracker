@@ -31,7 +31,7 @@ Tap any day tab at the top (M T W T F S S) to view that day's workout. The curre
 Tap any exercise row to check it off. Tap again to uncheck. A green dot appears on the day tab once you have any progress.
 
 ### Finishing a Workout
-When you're done, tap the orange **☐ Finish** button in the top-right. This:
+When you're done, tap the orange **Finish** button in the top-right. This:
 - Marks the day as complete
 - Shows a summary of what you did
 - Triggers an auto-export if that setting is on
