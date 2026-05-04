@@ -496,6 +496,14 @@
     .export-row-sub { font-size:11px; color:var(--dim); }
     .export-toggle { padding:5px 14px; border:none; border-radius:7px; font-size:12px; font-weight:800; cursor:pointer; background:var(--card); color:var(--dim); letter-spacing:0.5px; }
     .export-toggle.on { background:rgba(48,209,88,0.15); color:var(--green); }
+    .help-modal { max-height: 85vh; overflow-y: auto; }
+    .help-section { margin-bottom: 18px; }
+    .help-section-hdr { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+    .help-row { display: flex; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13px; line-height: 1.4; }
+    .help-row:first-of-type { border-top: none; }
+    .help-key { color: var(--dim); font-weight: 700; min-width: 90px; flex-shrink: 0; }
+    .help-val { color: var(--text); }
+    .help-tip { background: rgba(255,107,0,0.08); border: 1px solid rgba(255,107,0,0.2); border-radius: 8px; padding: 9px 12px; font-size: 12px; color: var(--dim); line-height: 1.5; margin-bottom: 10px; }
 
     .delete-btn {
       width: 26px;
@@ -1138,6 +1146,7 @@ document.addEventListener('mousemove', e => { if (drag) _dragMove(e.clientY); })
 document.addEventListener('mouseup',   e => { if (drag) _dragEnd(e.clientY); });
 
 function openSettings() { modal = { type: 'schedule', draft: Object.assign({}, schedule) }; render(); }
+function openHelp()     { modal = { type: 'help' }; render(); }
 function openEditFromSettings() { modal = null; editMode = true; render(); }
 
 const KUDOS = [
@@ -1476,6 +1485,54 @@ function renderModal() {
       </div>
     </div>`;
   }
+  if (modal.type === 'help') {
+    return `<div class="modal-overlay" onclick="closeModal()">
+      <div class="modal help-modal" onclick="event.stopPropagation()">
+        <h3>❓ Help</h3>
+
+        <div class="help-tip">💡 For updates, visit the app URL in Safari once — no reinstall needed. Only reinstall when the icon or app title changes.</div>
+
+        <div class="help-section">
+          <div class="help-section-hdr">Daily Use</div>
+          <div class="help-row"><span class="help-key">Check off</span><span class="help-val">Tap any exercise to check it. Tap again to uncheck.</span></div>
+          <div class="help-row"><span class="help-key">☐ Finish</span><span class="help-val">Marks your workout complete for the day. Shows a summary and triggers auto-export if enabled.</span></div>
+          <div class="help-row"><span class="help-key">✓ Complete</span><span class="help-val">Already finished — tap to review your summary.</span></div>
+          <div class="help-row"><span class="help-key">Cardio timer</span><span class="help-val">Check a timed exercise, then use +/− to log minutes.</span></div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-hdr">Workout Types</div>
+          <div class="help-row"><span class="help-key">Upper Body</span><span class="help-val">Chest, Lats, Shoulders, Back, Biceps, Triceps, Forearms, Cardio, Stretching</span></div>
+          <div class="help-row"><span class="help-key">Legs & Core</span><span class="help-val">Warm Up, Legs + Glutes, Abs + Core</span></div>
+          <div class="help-row"><span class="help-key">Full Body</span><span class="help-val">Both Upper Body and Legs & Core combined in one view</span></div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-hdr">Settings ⚙︎</div>
+          <div class="help-row"><span class="help-key">Schedule</span><span class="help-val">Set each day to a workout type or Rest</span></div>
+          <div class="help-row"><span class="help-key">Weekly Stats</span><span class="help-val">Off / After Finish / Always — controls the stats card in the header</span></div>
+          <div class="help-row"><span class="help-key">Edit Exercises</span><span class="help-val">Add, rename, delete, or reorder exercises and sections</span></div>
+          <div class="help-row"><span class="help-key">History</span><span class="help-val">View archived weeks with per-day completion stats</span></div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-hdr">Data Backup</div>
+          <div class="help-row"><span class="help-key">Export Now</span><span class="help-val">Saves all your data as a JSON file to Files/iCloud</span></div>
+          <div class="help-row"><span class="help-key">Auto-Export</span><span class="help-val">Automatically exports after every Finish — keep this ON</span></div>
+          <div class="help-row"><span class="help-key">Reinstalling</span><span class="help-val">Wipes all data. Always export first before reinstalling.</span></div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-hdr">Start New Week</div>
+          <div class="help-row"><span class="help-key">↻ Button</span><span class="help-val">Archives the current week to History, then clears all checked exercises. Requires two confirmations.</span></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-btn confirm" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'schedule') {
     const days = [['Mon',1],['Tue',2],['Wed',3],['Thu',4],['Fri',5],['Sat',6],['Sun',0]];
     const rows = days.map(([name, i]) => {
@@ -1514,6 +1571,7 @@ function renderModal() {
             <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit Exercises</button>
             <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
           </div>
+          <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="openHelp()">❓ Help</button>
           <div class="export-row">
             <div class="export-row-info">
               <span class="export-row-label">Auto-Export on Finish</span>
@@ -1578,7 +1636,7 @@ function render() {
         ? `<button class="edit-toggle active" onclick="toggleEditMode()">Done</button>`
         : isDone
           ? `<button class="complete-btn" onclick="showSummary()">✓ Complete</button>`
-          : `<button class="finish-btn" onclick="markComplete()">☐ Finish</button>`)
+          : `<button class="finish-btn" onclick="markComplete()">Finish</button>`)
     : '';
 
   let headerMeta = '';
