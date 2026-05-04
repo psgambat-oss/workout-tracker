@@ -490,6 +490,12 @@
     .settings-seg span + span { border-left:1px solid var(--border); }
     .settings-tools { display:flex; gap:8px; }
     .settings-tools button { flex:1; }
+    .export-row { display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding:10px 12px; background:var(--card2); border-radius:10px; }
+    .export-row-info { display:flex; flex-direction:column; gap:2px; }
+    .export-row-label { font-size:13px; font-weight:700; color:var(--text); }
+    .export-row-sub { font-size:11px; color:var(--dim); }
+    .export-toggle { padding:5px 14px; border:none; border-radius:7px; font-size:12px; font-weight:800; cursor:pointer; background:var(--card); color:var(--dim); letter-spacing:0.5px; }
+    .export-toggle.on { background:rgba(48,209,88,0.15); color:var(--green); }
 
     .delete-btn {
       width: 26px;
@@ -817,6 +823,7 @@ const KEY_PREFS  = 'wl26_prefs';
 const DEFAULT_SCHEDULE = { 0: null, 1: 'fullBody', 2: 'legsCore', 3: 'fullBody', 4: 'legsCore', 5: 'fullBody', 6: null };
 
 let statsMode        = 'off'; // 'off' | 'auto' | 'always'
+let autoExport       = false;
 let schedule         = Object.assign({}, DEFAULT_SCHEDULE);
 let state            = {};
 let collapsed        = {};
@@ -831,8 +838,9 @@ function loadSchedule() {
 }
 function saveSchedule()      { localStorage.setItem(KEY_SCHED, JSON.stringify(schedule)); }
 function saveHistory()       { localStorage.setItem(KEY_HIST,  JSON.stringify(workoutHistory)); }
-function savePrefs()         { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode })); }
-function setStatsMode(mode)  { statsMode = mode; savePrefs(); render(); }
+function savePrefs()              { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode, autoExport })); }
+function setStatsMode(mode)       { statsMode = mode; savePrefs(); render(); }
+function toggleAutoExport()       { autoExport = !autoExport; savePrefs(); render(); }
 
 function getDefaultDate() {
   const d = new Date();
@@ -848,7 +856,7 @@ function loadState() {
   try { collapsed       = JSON.parse(localStorage.getItem(KEY_COL))  || {}; } catch(e) { collapsed = {}; }
   try { completedDays   = JSON.parse(localStorage.getItem(KEY_DONE)) || {}; } catch(e) { completedDays = {}; }
   try { workoutHistory  = JSON.parse(localStorage.getItem(KEY_HIST)) || []; } catch(e) { workoutHistory = []; }
-  try { const p = localStorage.getItem(KEY_PREFS); if (p) { const prefs = JSON.parse(p); statsMode = prefs.statsMode || 'off'; } } catch(e) {}
+  try { const p = localStorage.getItem(KEY_PREFS); if (p) { const prefs = JSON.parse(p); statsMode = prefs.statsMode || 'off'; autoExport = !!prefs.autoExport; } } catch(e) {}
   try { const r = localStorage.getItem(KEY_EX); if (r) customExercises = JSON.parse(r); } catch(e) {}
 }
 
@@ -1145,6 +1153,7 @@ const KUDOS = [
 function markComplete() {
   completedDays[dateKey(currentDate)] = true;
   saveCompletedDays();
+  if (autoExport) exportData();
   showSummary();
 }
 
@@ -1217,6 +1226,26 @@ function doReset() {
 }
 
 function openHistory() { modal = { type: 'history' }; render(); }
+
+function exportData() {
+  const data = {
+    exportedAt:      new Date().toISOString(),
+    version:         'wl26',
+    schedule:        JSON.parse(localStorage.getItem(KEY_SCHED) || '{}'),
+    state:           JSON.parse(localStorage.getItem(KEY)       || '{}'),
+    completedDays:   JSON.parse(localStorage.getItem(KEY_DONE)  || '{}'),
+    workoutHistory:  JSON.parse(localStorage.getItem(KEY_HIST)  || '[]'),
+    customExercises: JSON.parse(localStorage.getItem(KEY_EX)    || 'null'),
+    prefs:           JSON.parse(localStorage.getItem(KEY_PREFS) || '{}'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `workout-log-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 // ─────────────────────────────────────────────
 // RENDER
@@ -1485,6 +1514,14 @@ function renderModal() {
             <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit Exercises</button>
             <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
           </div>
+          <div class="export-row">
+            <div class="export-row-info">
+              <span class="export-row-label">Auto-Export on Finish</span>
+              <span class="export-row-sub">Saves JSON backup to Files after each workout</span>
+            </div>
+            <button class="export-toggle${autoExport ? ' on' : ''}" onclick="toggleAutoExport()">${autoExport ? 'ON' : 'OFF'}</button>
+          </div>
+          <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="exportData()">⬇ Export Data Now</button>
         </div>
 
         <div class="modal-actions">
