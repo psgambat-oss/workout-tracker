@@ -1062,6 +1062,17 @@ function migrateExercises() {
       ]});
       dirty = true;
     }
+    // Ensure STATIC STRETCHING group exists
+    if (!sharedWarmup.groups.find(g => g.name === 'STATIC STRETCHING')) {
+      const yogaIdx = sharedWarmup.groups.findIndex(g => g.name === 'YOGA');
+      sharedWarmup.groups.splice(yogaIdx + 1, 0, { name: 'STATIC STRETCHING', items: [
+        { id: 'wu3', label: 'Warm Up (active)',  timed: true },
+        { id: 'wu4', label: 'Warm Up (passive)', timed: true },
+        { id: 'wu5', label: 'Cooldown (active)', timed: true },
+        { id: 'wu6', label: 'Cooldown (passive)', timed: true },
+      ]});
+      dirty = true;
+    }
     // Ensure STRETCHING VIDEOS group exists
     if (!sharedWarmup.groups.find(g => g.name === 'STRETCHING VIDEOS')) {
       sharedWarmup.groups.push({ name: 'STRETCHING VIDEOS', items: [
@@ -2519,7 +2530,7 @@ function render() {
   }
 
   const streak = getStreak();
-  const streakBadge = streak > 0 ? `<span class="streak-badge">🔥 ${streak}</span>` : '';
+  const streakBadge = '';
 
   document.getElementById('app').innerHTML = `
     <div class="app-header">
