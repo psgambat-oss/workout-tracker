@@ -268,6 +268,7 @@
 
     .exercise-label { font-size: 15px; flex: 1; line-height: 1.3; }
     .timed-icon { font-size: 11px; color: var(--dim); flex-shrink: 0; margin-left: 4px; opacity: 0.6; }
+    .video-link-btn { background: none; border: none; font-size: 15px; cursor: pointer; padding: 0 2px; flex-shrink: 0; opacity: 0.8; line-height: 1; }
 
     /* ── DAY BADGES ── */
     .day-badges { display: flex; gap: 3px; flex-shrink: 0; }
@@ -809,10 +810,6 @@ const EXERCISES = {
           { id: 'wu5', label: 'Cooldown (active)', timed: true },
           { id: 'wu6', label: 'Cooldown (passive)',timed: true },
         ]},
-        { name: 'STRETCHING VIDEOS', items: [
-          { id: 'wu7', label: '3 Exercises Over 50 (Patrick DiBello)', timed: true },
-          { id: 'wu8', label: 'Cossack Squats (Patrick DiBello)',       timed: true },
-        ]},
       ]
     },
     {
@@ -869,14 +866,6 @@ const EXERCISES = {
         { name: 'Ab Machines', items: [
           { id: 'co15', label: 'AbCoaster machine' },
         ]},
-        { name: 'Core Videos', items: [
-          { id: 'co16', label: 'Zeus Fitness: Six Pack Abs v.1 — Part 1' },
-          { id: 'co17', label: 'Zeus Fitness: Six Pack Abs v.1 — Part 2' },
-          { id: 'co18', label: 'Zeus Fitness: Six Pack Abs v.2' },
-          { id: 'co19', label: 'Brian Klepacki (isometric)' },
-          { id: 'co20', label: 'Kevin Clark' },
-          { id: 'co21', label: 'Just Stretch' },
-        ]},
       ]
     },
     {
@@ -907,7 +896,7 @@ const KEY_VER    = 'wl26_ver';
 const KEY_NOTES  = 'wl26_notes';
 const KEY_HIDDEN = 'wl26_hidden';
 
-const APP_VERSION = '3.5';
+const APP_VERSION = '3.5.3';
 
 // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 function makeDayCfg(type, opts={}) {
@@ -1075,14 +1064,9 @@ function migrateExercises() {
       ]});
       dirty = true;
     }
-    // Ensure STRETCHING VIDEOS group exists
-    if (!sharedWarmup.groups.find(g => g.name === 'STRETCHING VIDEOS')) {
-      sharedWarmup.groups.push({ name: 'STRETCHING VIDEOS', items: [
-        { id: 'wu7', label: '3 Exercises Over 50 (Patrick DiBello)', timed: true },
-        { id: 'wu8', label: 'Cossack Squats (Patrick DiBello)',       timed: true },
-      ]});
-      dirty = true;
-    }
+    // Remove STRETCHING VIDEOS group if present (removed from defaults in v3.5.3)
+    const svIdx = sharedWarmup.groups.findIndex(g => g.name === 'STRETCHING VIDEOS');
+    if (svIdx !== -1) { sharedWarmup.groups.splice(svIdx, 1); dirty = true; }
     // Remove "(5-10 min)" from any labels & fix "Warmup" → "Warm Up"
     sharedWarmup.groups.forEach(g => g.items.forEach(item => {
       const fixed = item.label.replace(/\s*\(5-10 min\)/gi, '').replace(/\bWarmup\b/g, 'Warm Up');
@@ -1138,6 +1122,14 @@ function migrateExercises() {
       crunches.items.push({ id: 'co22', label: 'Weighted side bend' });
       dirty = true;
     }
+  });
+
+  // Remove Core Videos group if present (removed from defaults in v3.5.3)
+  [customExercises.shared, customExercises.legsCore].forEach(sections => {
+    const coreSec = sections?.find(s => s.id === 'core');
+    if (!coreSec) return;
+    const cvIdx = coreSec.groups?.findIndex(g => g.name === 'Core Videos');
+    if (cvIdx !== -1 && cvIdx !== undefined) { coreSec.groups.splice(cvIdx, 1); dirty = true; }
   });
 
   if (dirty) saveCustomExercises();
@@ -1348,7 +1340,10 @@ function openAddModal(workoutType, sectionId, groupName) {
 }
 
 function openEditModal(id, workoutType, sectionId, label) {
-  modal = { type: 'editEx', id, workoutType, sectionId, label };
+  const ex = getExercises();
+  let url = '';
+  (ex[workoutType] || []).forEach(sec => sec.groups?.forEach(g => g.items?.forEach(item => { if (item.id === id) url = item.url || ''; })));
+  modal = { type: 'editEx', id, workoutType, sectionId, label, url };
   render();
   setTimeout(() => { const i = document.getElementById('modal-input'); if (i) { i.focus(); i.select(); } }, 50);
 }
@@ -1375,12 +1370,17 @@ function saveModalEdit() {
   if (!val) return;
 
   if (modal.type === 'editEx') {
+    const urlVal = document.getElementById('modal-url-input')?.value.trim() || '';
     ensureCustomExercises();
     const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
     if (sec) {
       sec.groups.forEach(g => {
         const item = g.items.find(i => i.id === modal.id);
-        if (item) item.label = val;
+        if (item) {
+          item.label = val;
+          if (urlVal) item.url = urlVal;
+          else delete item.url;
+        }
       });
       saveCustomExercises();
     }
@@ -1882,10 +1882,12 @@ function renderExercise(item, ds, workoutType, sectionId, gIdx, iIdx) {
   }
 
   const timedIcon = item.timed && !checked ? `<span class="timed-icon">⏱</span>` : '';
+  const videoBtn  = item.url ? `<button class="video-link-btn" onclick="event.stopPropagation();window.open('${esc(item.url)}','_blank')" title="Watch video">🎬</button>` : '';
   return `<div class="exercise-item${checked ? ' checked' : ''}" onclick="toggleExercise('${item.id}')">
     <div class="checkbox"><span class="checkmark">✓</span></div>
     <span class="exercise-label">${esc(item.label)}</span>
     ${timedIcon}
+    ${videoBtn}
     ${badgesHtml}
     ${timeHtml}
   </div>`;
@@ -2039,6 +2041,7 @@ function renderModal() {
       <div class="modal" onclick="event.stopPropagation()">
         <h3>Edit Exercise</h3>
         <input id="modal-input" class="modal-input" type="text" value="${esc(modal.label)}" placeholder="Exercise name">
+        <input id="modal-url-input" class="modal-input" type="url" value="${esc(modal.url||'')}" placeholder="🎬 Video URL (optional)" style="margin-top:8px">
         <div class="modal-actions">
           <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
           <button class="modal-btn confirm" onclick="saveModalEdit()">Save</button>

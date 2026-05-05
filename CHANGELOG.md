@@ -1,5 +1,10 @@
 # Workout Tracker Changelog
 
+## v3.5.3 — 2026-05-05
+- **🎬 Video links**: Add a YouTube or web URL to any exercise via Edit mode — a 🎬 icon appears on the exercise row and taps open the video in the browser
+- **Removed video sub-sections**: STRETCHING VIDEOS (Warm Up/Cooldown) and Core Videos (Abs + Core) removed from default exercises — add your own via the 🎬 URL field instead
+- **Migration**: Existing users with STRETCHING VIDEOS or Core Videos sub-sections will have them automatically removed on next load
+
 ## v3.5.2 — 2026-05-05
 - **⏱ Timed indicator**: Clock icon appears on all timed exercises (Warm Up, Cardio, Yoga) before checking — disappears once checked and time selector appears
 - **AVG / DAY**: Replaced misleading "AVG DONE %" with average exercises checked per workout day this week
