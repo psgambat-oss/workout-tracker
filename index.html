@@ -985,7 +985,6 @@ function loadState() {
 
 function migrateExercises() {
   // v3.5: restructure — warmup/cardio/core/yoga moved to EXERCISES.shared
-  // Migrate any stored exercises that still have them in old locations
   if (!customExercises) return;
   let dirty = false;
 
@@ -1000,15 +999,6 @@ function migrateExercises() {
     const warmupIdx = customExercises.legsCore.findIndex(s => s.id === 'warmup');
     if (warmupIdx !== -1) {
       const [warmup] = customExercises.legsCore.splice(warmupIdx, 1);
-      // Ensure YOGA group exists in warmup
-      if (!warmup.groups.find(g => g.name === 'YOGA')) {
-        warmup.groups.splice(1, 0, { name: 'YOGA', items: [
-          { id: 'wu9',  label: 'Dynamic Movement (flow)', timed: true },
-          { id: 'wu10', label: 'Static Stretching (hold)',timed: true },
-        ]});
-      }
-      // Ensure all warmup items timed
-      warmup.groups.forEach(g => g.items.forEach(i => { i.timed = true; }));
       const existing = customExercises.shared.findIndex(s => s.id === 'warmup');
       if (existing === -1) customExercises.shared.unshift(warmup);
       else customExercises.shared[existing] = warmup;
@@ -1023,9 +1013,6 @@ function migrateExercises() {
       else customExercises.shared[existing] = core;
       dirty = true;
     }
-    // Rename 'legs' section if it was never renamed
-    const legsSec = customExercises.legsCore.find(s => s.id === 'legs');
-    // keep as-is — just ensure legsCore only has legs section
   }
 
   // Move cardio out of fullBody if still there
@@ -1048,6 +1035,60 @@ function migrateExercises() {
       dirty = true;
     }
   }
+
+  // ── Content upgrades for shared sections ────────────────────────────────
+
+  const sharedCardio = customExercises.shared.find(s => s.id === 'cardio');
+  if (sharedCardio) {
+    // Detect old cardio: missing Freestyle Run (cd1b) means pre-v3.5 content
+    const allItems = sharedCardio.groups.flatMap(g => g.items);
+    const hasFreestyle = allItems.some(i => i.id === 'cd1b');
+    if (!hasFreestyle) {
+      // Replace entire cardio section with current default
+      const defaultCardio = JSON.parse(JSON.stringify(EXERCISES.shared.find(s => s.id === 'cardio')));
+      const idx = customExercises.shared.findIndex(s => s.id === 'cardio');
+      customExercises.shared[idx] = defaultCardio;
+      dirty = true;
+    }
+  }
+
+  const sharedWarmup = customExercises.shared.find(s => s.id === 'warmup');
+  if (sharedWarmup) {
+    // Ensure YOGA group exists
+    if (!sharedWarmup.groups.find(g => g.name === 'YOGA')) {
+      sharedWarmup.groups.splice(1, 0, { name: 'YOGA', items: [
+        { id: 'wu9',  label: 'Dynamic Movement (flow)', timed: true },
+        { id: 'wu10', label: 'Static Stretching (hold)', timed: true },
+      ]});
+      dirty = true;
+    }
+    // Ensure STRETCHING VIDEOS group exists
+    if (!sharedWarmup.groups.find(g => g.name === 'STRETCHING VIDEOS')) {
+      sharedWarmup.groups.push({ name: 'STRETCHING VIDEOS', items: [
+        { id: 'wu7', label: '3 Exercises Over 50 (Patrick DiBello)', timed: true },
+        { id: 'wu8', label: 'Cossack Squats (Patrick DiBello)',       timed: true },
+      ]});
+      dirty = true;
+    }
+    // Remove "(5-10 min)" from any labels & fix "Warmup" → "Warm Up"
+    sharedWarmup.groups.forEach(g => g.items.forEach(item => {
+      const fixed = item.label.replace(/\s*\(5-10 min\)/gi, '').replace(/\bWarmup\b/g, 'Warm Up');
+      if (fixed !== item.label) { item.label = fixed; dirty = true; }
+      item.timed = true;
+    }));
+  }
+
+  // Fix "HIT " → "HIIT " across all stored exercises
+  const fixHIIT = (sections) => {
+    if (!sections) return;
+    sections.forEach(sec => sec.groups && sec.groups.forEach(g => g.items && g.items.forEach(item => {
+      const fixed = item.label.replace(/\bHIT\b(?!T)/g, 'HIIT');
+      if (fixed !== item.label) { item.label = fixed; dirty = true; }
+    })));
+  };
+  fixHIIT(customExercises.shared);
+  fixHIIT(customExercises.fullBody);
+  fixHIIT(customExercises.legsCore);
 
   if (dirty) saveCustomExercises();
 }
@@ -2289,7 +2330,7 @@ function renderModal() {
             <div class="export-row" style="cursor:pointer" onclick="openTrainerNotesEditor()">
               <div class="export-row-info">
                 <span class="export-row-label">Show on workout screen</span>
-                <span class="export-row-sub">Tap to manage notes shown in each section</span>
+                <span class="export-row-sub" style="color:var(--accent);font-weight:700">✎ Manage Notes</span>
               </div>
               <button class="export-toggle${trainerNotes.enabled ? ' on' : ''}" onclick="event.stopPropagation();toggleTrainerNotesEnabled()">${trainerNotes.enabled ? 'ON' : 'OFF'}</button>
             </div>
