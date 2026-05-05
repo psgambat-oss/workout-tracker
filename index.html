@@ -2239,7 +2239,7 @@ function renderModal() {
       const isRest = !t;
       const optRow = isRest ? '' : `
         <div class="sched-opts-optional">
-          <button class="sched-opt-btn${cur.warmup?' sel':''}" onclick="toggleSchedOpt(${i},'warmup')">Warm Up</button>
+          <button class="sched-opt-btn${cur.warmup?' sel':''}" onclick="toggleSchedOpt(${i},'warmup')">Warm Up/Cooldown</button>
           <button class="sched-opt-btn${cur.cardio?' sel':''}" onclick="toggleSchedOpt(${i},'cardio')">Cardio</button>
           <button class="sched-opt-btn${cur.core  ?' sel':''}" onclick="toggleSchedOpt(${i},'core')">Abs + Core</button>
           <button class="sched-opt-btn${cur.yoga  ?' sel':''}" onclick="toggleSchedOpt(${i},'yoga')">Yoga</button>
