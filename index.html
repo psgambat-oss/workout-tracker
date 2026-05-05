@@ -1078,6 +1078,20 @@ function migrateExercises() {
     }));
   }
 
+  // Remove old standalone Stretching section (merged into Warm Up / Cool Down)
+  if (customExercises.fullBody) {
+    const stretchIdx = customExercises.fullBody.findIndex(s => s.id === 'stretching');
+    if (stretchIdx !== -1) { customExercises.fullBody.splice(stretchIdx, 1); dirty = true; }
+  }
+  if (customExercises.legsCore) {
+    const stretchIdx = customExercises.legsCore.findIndex(s => s.id === 'stretching');
+    if (stretchIdx !== -1) { customExercises.legsCore.splice(stretchIdx, 1); dirty = true; }
+  }
+  if (customExercises.shared) {
+    const stretchIdx = customExercises.shared.findIndex(s => s.id === 'stretching');
+    if (stretchIdx !== -1) { customExercises.shared.splice(stretchIdx, 1); dirty = true; }
+  }
+
   // Fix "HIT " → "HIIT " across all stored exercises
   const fixHIIT = (sections) => {
     if (!sections) return;
