@@ -50,8 +50,8 @@ When you're done, tap the orange **Finish** button in the top-right. This:
 
 Once finished, the button turns green — **✓ Complete** — and tapping it shows your summary again.
 
-### Cardio / Timed Exercises
-After checking a timed exercise, +/− buttons appear to log how many minutes you did.
+### Timed Exercises
+Exercises with a ⏱ icon track time. After checking one, +/− buttons appear to log how many minutes you did. Timed exercises include all Warm Up / Cooldown, Cardio, and Yoga items.
 
 ---
 
@@ -68,10 +68,10 @@ Any day can include any combination of these sections, configured per-day in Set
 
 | Section | Description |
 |---------|-------------|
-| Warm Up | Warm Up / Cool Down (Cardio, Yoga, Static Stretching, Stretching Videos) |
+| Warm Up/Cooldown | Cardio warm-up, Yoga, Static Stretching, Stretching Videos — all timed |
 | Cardio | Treadmill, Cycling, Rowing, Elliptical — all timed |
 | Abs + Core | TRX, Crunches, Leg Raises, BOSU, Ab Machines, Core Videos |
-| Yoga | Active Standing Poses, Core Work, Deep Stretches |
+| Yoga | Active Standing Poses, Core Work, Deep Stretches — all timed |
 
 Warm Up appears first; Cardio, Abs + Core, and Yoga appear at the end of the workout.
 
@@ -80,13 +80,22 @@ Warm Up appears first; Cardio, Abs + Core, and Yoga appear at the end of the wor
 ## Settings (⚙︎ Gear Icon)
 
 ### Workout Schedule
-Set each day of the week to Upper Body, Legs, Full Body, or Rest. Below the type selection, toggle optional sections (Warm Up / Cardio / Abs + Core / Yoga) per day. Tap **Save** to apply.
+The schedule uses a two-column layout with a single **STRENGTH | EXERCISE** header. For each day:
+- **Left column (Strength)** — choose Upper Body, Legs, Full Body, or Rest
+- **Right column (Exercise)** — toggle optional sections: Warm Up/Cooldown, Abs + Core, Cardio, Yoga
+
+Tap **Save** to apply.
 
 ### Weekly Stats
-Controls the stats card (This Week / Avg Done / Streak) displayed in the header:
+Controls the stats card (**This Week / Avg / Day / Streak**) displayed below the day tabs:
 - **Off** — never shown
 - **After Finish** — shown automatically after you tap Finish, until the next day
 - **Always** — always visible
+
+**Avg / Day** shows the average number of exercises you checked per workout day this week — not a percentage of all available exercises.
+
+### Trainer Notes
+Tap **✎ Manage Notes** to add personal reminders that appear on your workout screen. Toggle ON/OFF to show or hide them.
 
 ### Tools
 | Button | What it does |
@@ -135,7 +144,7 @@ Your history is always viewable in Settings → 📋 History.
 ---
 
 ## Streak
-The 🔥 N streak badge in the header counts consecutive days where you had a scheduled workout and tapped Finish. Rest days don't break the streak.
+The 🔥 streak count in the stats card shows consecutive days where you had a scheduled workout and tapped Finish. Rest days don't break the streak.
 
 ---
 

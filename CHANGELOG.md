@@ -1,5 +1,15 @@
 # Workout Tracker Changelog
 
+## v3.5.2 — 2026-05-05
+- **⏱ Timed indicator**: Clock icon appears on all timed exercises (Warm Up, Cardio, Yoga) before checking — disappears once checked and time selector appears
+- **AVG / DAY**: Replaced misleading "AVG DONE %" with average exercises checked per workout day this week
+- **WARM UP / COOLDOWN**: "Cool Down" corrected to one word "Cooldown" throughout
+- **Exercises**: Renamed "Mat side ankle touch" → "Mat heel touch"; added "Weighted side bend" to Crunches
+- **Streak**: 🔥 badge removed from app title — still visible in stats card
+- **Settings**: Schedule redesigned as two-column layout (STRENGTH | EXERCISE) with single header row
+- **Trainer Notes**: "Tap to manage" replaced with visible "✎ Manage Notes" in orange
+- **Migration**: Automatically upgrades old stored exercise data — removes stale Stretching section, adds missing STATIC STRETCHING / YOGA / STRETCHING VIDEOS groups to Warm Up, upgrades old Cardio to include Freestyle variants and Elliptical
+
 ## v3.5 — 2026-05-04
 - **Optional Sections**: Warm Up / Cooldown, Cardio, Abs + Core, and Yoga can now be added to any workout day — toggled per-day in Settings via pill buttons
 - **New schedule types**: Simplified to Upper Body, Legs, Full Body, and Rest (removed "Legs & Core" as a type)
