@@ -267,6 +267,7 @@
     .exercise-item.checked .checkmark { display: block; }
 
     .exercise-label { font-size: 15px; flex: 1; line-height: 1.3; }
+    .timed-icon { font-size: 11px; color: var(--dim); flex-shrink: 0; margin-left: 4px; opacity: 0.6; }
 
     /* ── DAY BADGES ── */
     .day-badges { display: flex; gap: 3px; flex-shrink: 0; }
@@ -792,7 +793,7 @@ const EXERCISES = {
 
   shared: [
     {
-      id: 'warmup', name: 'WARM UP / COOL DOWN', icon: '🚶',
+      id: 'warmup', name: 'WARM UP / COOLDOWN', icon: '🚶',
       groups: [
         { name: 'CARDIO', items: [
           { id: 'wu1', label: 'Treadmill Warm Up Walk',   timed: true },
@@ -854,7 +855,8 @@ const EXERCISES = {
           { id: 'co7',  label: 'Rotations cable' },
           { id: 'co8',  label: 'Machine pull down' },
           { id: 'co9',  label: 'Mat' },
-          { id: 'co10', label: 'Mat side ankle touch' },
+          { id: 'co10', label: 'Mat heel touch' },
+          { id: 'co22', label: 'Weighted side bend' },
         ]},
         { name: 'Leg Raises', items: [
           { id: 'co11', label: 'Hanging' },
@@ -1114,6 +1116,29 @@ function migrateExercises() {
   fixHIIT(customExercises.shared);
   fixHIIT(customExercises.fullBody);
   fixHIIT(customExercises.legsCore);
+
+  // Rename specific exercises in stored data
+  const fixLabels = (sections) => {
+    if (!sections) return;
+    sections.forEach(sec => sec.groups && sec.groups.forEach(g => g.items && g.items.forEach(item => {
+      if (item.id === 'co10' && item.label === 'Mat side ankle touch') { item.label = 'Mat heel touch'; dirty = true; }
+    })));
+  };
+  fixLabels(customExercises.shared);
+  fixLabels(customExercises.fullBody);
+  fixLabels(customExercises.legsCore);
+
+  // Add missing Crunches items if not present
+  const coreShared = customExercises.shared?.find(s => s.id === 'core');
+  const coreLegs = customExercises.legsCore?.find(s => s.id === 'core');
+  [coreShared, coreLegs].forEach(core => {
+    if (!core) return;
+    const crunches = core.groups?.find(g => g.name === 'Crunches');
+    if (crunches && !crunches.items.find(i => i.id === 'co22')) {
+      crunches.items.push({ id: 'co22', label: 'Weighted side bend' });
+      dirty = true;
+    }
+  });
 
   if (dirty) saveCustomExercises();
 }
@@ -1856,9 +1881,11 @@ function renderExercise(item, ds, workoutType, sectionId, gIdx, iIdx) {
     </div>`;
   }
 
+  const timedIcon = item.timed && !checked ? `<span class="timed-icon">⏱</span>` : '';
   return `<div class="exercise-item${checked ? ' checked' : ''}" onclick="toggleExercise('${item.id}')">
     <div class="checkbox"><span class="checkmark">✓</span></div>
     <span class="exercise-label">${esc(item.label)}</span>
+    ${timedIcon}
     ${badgesHtml}
     ${timeHtml}
   </div>`;
@@ -2200,7 +2227,7 @@ function renderModal() {
       { val: 'triceps',   label: 'Upper Body — TRICEPS' },
       { val: 'forearms',  label: 'Upper Body — FOREARMS' },
       { val: 'cardio',    label: 'Upper Body — CARDIO' },
-      { val: 'warmup',    label: 'Optional — WARM UP / COOL DOWN' },
+      { val: 'warmup',    label: 'Optional — WARM UP / COOLDOWN' },
       { val: 'legs',      label: 'Legs — LEGS + GLUTES' },
       { val: 'core',      label: 'Optional — ABS + CORE' },
     ];
@@ -2442,17 +2469,17 @@ function renderStatsCard() {
   const weekDays = getWeekDays(currentDate);
   const workoutDays = weekDays.filter(d => getWorkoutType(d));
   const completed = workoutDays.filter(d => completedDays[dateKey(d)]).length;
-  let totalPct = 0, pctCount = 0;
+  let totalDone = 0, daysWithActivity = 0;
   workoutDays.forEach(d => {
     const type = getWorkoutType(d);
-    const { done, total } = getProgress(type, d);
-    if (total > 0) { totalPct += Math.round((done / total) * 100); pctCount++; }
+    const { done } = getProgress(type, d);
+    if (done > 0) { totalDone += done; daysWithActivity++; }
   });
-  const avg = pctCount ? Math.round(totalPct / pctCount) : 0;
+  const avgEx = daysWithActivity ? Math.round(totalDone / daysWithActivity) : 0;
   const streak = getStreak();
   return `<div class="stats-card">
     <div class="stats-cell"><div class="stats-label">This Week</div><div class="stats-value">${completed} / ${workoutDays.length}</div></div>
-    <div class="stats-cell"><div class="stats-label">Avg Done</div><div class="stats-value">${avg}%</div></div>
+    <div class="stats-cell"><div class="stats-label">Avg / Day</div><div class="stats-value">${avgEx} <span style="font-size:11px;opacity:0.6">ex</span></div></div>
     <div class="stats-cell"><div class="stats-label">Streak</div><div class="stats-value">🔥 ${streak}</div></div>
   </div>`;
 }
