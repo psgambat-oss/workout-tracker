@@ -1,5 +1,19 @@
 # Workout Tracker Changelog
 
+## v3.5 — 2026-05-04
+- **Optional Sections**: Warm Up / Cooldown, Cardio, Abs + Core, and Yoga can now be added to any workout day — toggled per-day in Settings via pill buttons
+- **New schedule types**: Simplified to Upper Body, Legs, Full Body, and Rest (removed "Legs & Core" as a type)
+- **Shared sections architecture**: Warm Up / Cooldown, Cardio, Abs + Core, and Yoga live in a shared pool — included in any day when toggled on
+- **Warm Up / Cooldown expanded**: New sub-sections — YOGA (Dynamic Movement / Static Stretching), STATIC STRETCHING, and STRETCHING VIDEOS; all items timed
+- **CARDIO expanded**: Added Freestyle variants (Run, Incline Hike, Walk, Cycle, Row) and new ELLIPTICAL sub-section (HIIT Glide, Freestyle Glide)
+- **YOGA section**: New top-level workout section with Active Standing Poses, Core Work, Deep Stretches — available as an optional section on any day
+- **Hide / Delete exercises**: Built-in exercises get a Hide button; user-created custom exercises get a ✕ Delete button. Hidden items are stored and can be shown/restored in edit mode via "Show hidden items" toggle
+- **Month in header**: 3-letter month abbreviation (e.g. May) displayed above the M (Monday) day tab
+- **Trainer Notes default blank**: New users start with no trainer notes pre-filled
+- **Spelling fixes**: "HIT" → "HIIT" throughout; "Warmup" → "Warm Up" throughout
+- **Stretching section removed**: Merged into Warm Up / Cooldown sub-sections
+- **Schedule migration**: Old schedule format (strings) automatically upgraded to new object format on first load
+
 ## v3.4 — 2026-05-04
 - **Edit mode overhaul**: Drag handles (≡) to reorder sections, subheaders, and exercises
 - **Move exercise (⇄)**: Move any exercise to a different section or subheader via picker modal

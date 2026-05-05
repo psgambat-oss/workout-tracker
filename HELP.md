@@ -37,7 +37,7 @@ A **Progressive Web App (PWA)** — a website that behaves like a native app. It
 ## Daily Use
 
 ### Selecting a Day
-Tap any day tab at the top (M T W T F S S) to view that day's workout. The current day is highlighted in orange.
+Tap any day tab at the top (M T W T F S S) to view that day's workout. The current day is highlighted in orange. The 3-letter month abbreviation appears above the M tab.
 
 ### Checking Off Exercises
 Tap any exercise row to check it off. Tap again to uncheck. A green dot appears on the day tab once you have any progress.
@@ -58,17 +58,29 @@ After checking a timed exercise, +/− buttons appear to log how many minutes yo
 ## Workout Types
 | Type | Description |
 |------|-------------|
-| Upper Body | Chest, Lats, Shoulders, Back, Biceps, Triceps, Forearms, Cardio, Stretching |
-| Legs & Core | Warm Up/Cool Down, Legs + Glutes, Abs + Core |
-| Full Body | Both Upper Body and Legs & Core sections combined |
+| Upper Body | Chest, Lats, Shoulders, Back, Biceps, Triceps, Forearms |
+| Legs | Legs + Glutes |
+| Full Body | Both Upper Body and Legs sections combined |
 | Rest | No workout — day is skipped |
+
+### Optional Sections
+Any day can include any combination of these sections, configured per-day in Settings:
+
+| Section | Description |
+|---------|-------------|
+| Warm Up | Warm Up / Cool Down (Cardio, Yoga, Static Stretching, Stretching Videos) |
+| Cardio | Treadmill, Cycling, Rowing, Elliptical — all timed |
+| Abs + Core | TRX, Crunches, Leg Raises, BOSU, Ab Machines, Core Videos |
+| Yoga | Active Standing Poses, Core Work, Deep Stretches |
+
+Warm Up appears first; Cardio, Abs + Core, and Yoga appear at the end of the workout.
 
 ---
 
 ## Settings (⚙︎ Gear Icon)
 
 ### Workout Schedule
-Set each day of the week to Upper Body, Legs & Core, Full Body, or Rest. Tap **Save** to apply.
+Set each day of the week to Upper Body, Legs, Full Body, or Rest. Below the type selection, toggle optional sections (Warm Up / Cardio / Abs + Core / Yoga) per day. Tap **Save** to apply.
 
 ### Weekly Stats
 Controls the stats card (This Week / Avg Done / Streak) displayed in the header:
@@ -79,10 +91,11 @@ Controls the stats card (This Week / Avg Done / Streak) displayed in the header:
 ### Tools
 | Button | What it does |
 |--------|-------------|
-| ✎ Edit Exercises | Add, rename, delete, or reorder exercises, sections, and subheaders |
+| ✎ Edit Exercises | Add, rename, delete, reorder, or hide exercises, sections, and subheaders |
 | 📋 History | View archived weeks with per-day completion stats |
 | Auto-Export on Finish | Toggle ON/OFF — automatically saves a JSON backup after each Finish |
 | ⬇ Export Data Now | Manually export all data to a JSON file (works on iOS, Android, and desktop) |
+| 📂 Import Backup | Restore all data from a previously exported JSON file |
 
 ---
 
@@ -94,11 +107,17 @@ Tap **✎ Edit Exercises** in Settings to enter edit mode.
 |---------|-------------|
 | ≡ Drag handle | Reorder exercises, subheaders, or sections |
 | ⇄ Move | Move an exercise to a different section or subheader |
-| ✕ Delete | Remove an exercise, subheader, or section (with confirmation) |
+| Hide | Hide a built-in exercise (it won't appear during workouts) |
+| ✕ Delete | Remove a user-created exercise (with confirmation) |
 | ✎ Pencil | Rename an exercise |
 | + Add to [Section] | Add a new exercise to that section |
 | + Add Subheader | Add a new subheader within a section |
 | + Add Section | Add a new top-level section |
+
+### Hidden exercises
+Tapping **Hide** on a built-in exercise removes it from your workout view but does not delete it. To restore hidden exercises, look for the **Show hidden items** toggle at the top of each section in edit mode — hidden exercises appear dimmed with a **Show** button to restore them.
+
+User-created exercises show a **✕** button instead of Hide — these are permanently deleted when removed.
 
 ### Rest Day
 If today is scheduled as a rest day, the app shows a **Settings** link directly on screen — tap it to change today's workout type.
@@ -132,6 +151,7 @@ Settings → **⬇ Export Data Now** saves a file named `workout-log-YYYY-MM-DD.
 - Full workout history
 - Any custom exercises you've added
 - App preferences (stats mode, auto-export setting)
+- Hidden exercise list
 
 ### Auto-Export
 When **Auto-Export on Finish** is ON, a JSON file is saved automatically every time you tap Finish. Recommended to keep this on so you always have a recent backup.

@@ -36,8 +36,8 @@
     /* ── HEADER ── */
     .app-header {
       background: var(--card);
-      padding: 20px 16px 14px;
-      padding-top: calc(20px + env(safe-area-inset-top));
+      padding: 12px 16px 8px;
+      padding-top: calc(12px + env(safe-area-inset-top));
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
@@ -50,14 +50,23 @@
       letter-spacing: 2.5px;
       color: var(--accent);
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
     }
 
     /* ── WEEK TABS ── */
+    .week-tabs-wrapper { margin-bottom: 12px; }
+    .week-tabs-month {
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--dim);
+      width: calc((100% - 36px) / 7);
+      text-align: center;
+      margin-bottom: 3px;
+    }
     .week-tabs {
       display: flex;
       gap: 6px;
-      margin-bottom: 12px;
     }
 
     .day-tab {
@@ -408,7 +417,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
 
     .header-actions { display: flex; align-items: center; gap: 8px; }
@@ -455,8 +464,12 @@
       color: var(--dim); font-size: 20px; padding-right: 10px;
       cursor: grab; touch-action: none; user-select: none; flex-shrink: 0;
     }
-    .section.dragging { opacity: 0.35; }
-    .section.drag-over { outline: 2px solid var(--accent); border-radius: 12px; }
+    .section.dragging          { opacity: 0.35; }
+    .section.drag-over         { outline: 2px solid var(--accent); border-radius: 12px; }
+    .group-container.dragging  { opacity: 0.35; }
+    .group-container.drag-over { outline: 2px solid var(--accent); border-radius: 8px; }
+    .exercise-item.dragging    { opacity: 0.35; background: rgba(255,107,0,0.08); }
+    .exercise-item.drag-over   { outline: 2px solid var(--accent); border-radius: 8px; }
     .add-section-btn {
       width: 100%; padding: 11px; margin-top: 8px;
       border: 1.5px dashed var(--card2); border-radius: 12px;
@@ -483,15 +496,22 @@
     .hist-stat   { color: var(--green); font-weight: 700; }
     .settings-section { margin-bottom: 16px; }
     .settings-section-hdr { font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
-    .sched-list { display: flex; flex-direction: column; gap: 8px; }
-    .sched-row { display: flex; align-items: center; gap: 8px; }
-    .sched-day { width: 32px; font-weight: 700; font-size: 13px; color: var(--text); flex-shrink: 0; }
-    .sched-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; flex: 1; }
+    .sched-list { display: flex; flex-direction: column; gap: 4px; }
+    .sched-row { display: flex; align-items: flex-start; gap: 8px; background: var(--card2); border-radius: 10px; padding: 5px 10px; }
+    .sched-day { width: 32px; font-weight: 700; font-size: 13px; color: var(--text); flex-shrink: 0; padding-top: 4px; }
+    .sched-col { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .sched-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .sched-opts-optional { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
     .sched-btn {
-      padding: 5px 4px; border: 1.5px solid var(--card2); border-radius: 7px;
+      padding: 3px 4px; border: 1.5px solid var(--card2); border-radius: 7px;
       background: transparent; color: var(--dim); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;
     }
     .sched-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(255,107,0,0.1); }
+    .sched-opt-btn {
+      padding: 2px 4px; border: 1px dashed var(--border); border-radius: 6px;
+      background: transparent; color: var(--dim); font-size: 10px; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .sched-opt-btn.sel { border-color: var(--green); border-style: solid; color: var(--green); background: rgba(48,209,88,0.08); }
     .settings-seg { display:flex; background:var(--card2); border-radius:8px; overflow:hidden; border:1px solid var(--border); }
     .settings-seg span { flex:1; padding:8px 4px; text-align:center; font-size:12px; font-weight:700; cursor:pointer; }
     .settings-seg span + span { border-left:1px solid var(--border); }
@@ -503,7 +523,9 @@
     .export-row-sub { font-size:11px; color:var(--dim); }
     .export-toggle { padding:5px 14px; border:none; border-radius:7px; font-size:12px; font-weight:800; cursor:pointer; background:var(--card); color:var(--dim); letter-spacing:0.5px; }
     .export-toggle.on { background:rgba(48,209,88,0.15); color:var(--green); }
-    .help-modal { max-height: 85vh; overflow-y: auto; }
+    .help-modal { max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+    .help-modal-body { flex: 1; overflow-y: auto; padding: 24px 24px 0; }
+    .help-modal .modal-actions { flex-shrink: 0; padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); background: var(--card); box-shadow: 0 -12px 12px 4px var(--card); }
     .help-section { margin-bottom: 18px; }
     .help-section-hdr { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
     .help-row { display: flex; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13px; line-height: 1.4; }
@@ -528,6 +550,20 @@
       flex-shrink: 0;
       line-height: 1;
     }
+    .hide-btn {
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--dim);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .hide-btn.show { border-color: var(--green); color: var(--green); }
+    .ex-hidden { opacity: 0.35; }
+    .show-hidden-toggle { font-size: 11px; color: var(--dim); text-align: right; padding: 4px 2px; cursor: pointer; text-decoration: underline; }
 
     .add-exercise-btn {
       display: flex;
@@ -647,7 +683,7 @@ const EXERCISES = {
       ]
     },
     {
-      id: 'biceps', name: 'BICEPS', icon: '💪', rightArm: true,
+      id: 'biceps', name: 'BICEPS', icon: '💪', rightArm: false,
       groups: [
         { name: 'Curls', items: [
           { id: 'bi1',  label: 'Dumbbell incline' },
@@ -674,7 +710,7 @@ const EXERCISES = {
       ]
     },
     {
-      id: 'triceps', name: 'TRICEPS', icon: '💪', rightArm: true,
+      id: 'triceps', name: 'TRICEPS', icon: '💪', rightArm: false,
       groups: [
         { name: 'Presses', items: [
           { id: 'tr1', label: 'Cable close-grip' },
@@ -694,7 +730,7 @@ const EXERCISES = {
       ]
     },
     {
-      id: 'forearms', name: 'FOREARMS', icon: '🤜', rightArm: true,
+      id: 'forearms', name: 'FOREARMS', icon: '🤜', rightArm: false,
       groups: [
         { name: 'Curls', items: [
           { id: 'fa1', label: 'Dumbbell' },
@@ -707,43 +743,9 @@ const EXERCISES = {
         ]},
       ]
     },
-    {
-      id: 'cardio', name: 'CARDIO', icon: '🏃',
-      groups: [
-        { name: 'Treadmill', items: [
-          { id: 'cd1', label: 'Hit Run',      timed: true },
-          { id: 'cd2', label: 'Incline Hike', timed: true },
-          { id: 'cd3', label: 'Power Walk',   timed: true },
-        ]},
-        { name: 'Cycling', items: [
-          { id: 'cd4', label: 'Hit Ride', timed: true },
-        ]},
-        { name: 'Rowing', items: [
-          { id: 'cd5', label: 'Hit Row', timed: true },
-        ]},
-      ]
-    },
-    {
-      id: 'stretching', name: 'STRETCHING', icon: '🧘',
-      groups: [
-        { name: '', items: [
-          { id: 'st1', label: 'Cossack Squats (Patrick DiBello)' },
-          { id: 'st2', label: '3 Exercises Over 50 (Patrick DiBello)' },
-        ]},
-      ]
-    },
   ],
 
   legsCore: [
-    {
-      id: 'warmup', name: 'WARM UP / COOL DOWN', icon: '🚶',
-      groups: [
-        { name: '', items: [
-          { id: 'wu1', label: 'Treadmill Warmup Walk (5–10 min)',   timed: true },
-          { id: 'wu2', label: 'Treadmill Cooldown Walk (5–10 min)', timed: true },
-        ]},
-      ]
-    },
     {
       id: 'legs', name: 'LEGS + GLUTES', icon: '🦵',
       groups: [
@@ -778,6 +780,57 @@ const EXERCISES = {
         ]},
         { name: 'Misc', items: [
           { id: 'lg18', label: 'Walk around w/ 25 lb kettle/plates' },
+        ]},
+      ]
+    },
+  ],
+
+  shared: [
+    {
+      id: 'warmup', name: 'WARM UP / COOL DOWN', icon: '🚶',
+      groups: [
+        { name: 'CARDIO', items: [
+          { id: 'wu1', label: 'Treadmill Warm Up Walk',   timed: true },
+          { id: 'wu2', label: 'Treadmill Cooldown Walk',  timed: true },
+        ]},
+        { name: 'YOGA', items: [
+          { id: 'wu9',  label: 'Dynamic Movement (flow)', timed: true },
+          { id: 'wu10', label: 'Static Stretching (hold)',timed: true },
+        ]},
+        { name: 'STATIC STRETCHING', items: [
+          { id: 'wu3', label: 'Warm Up (active)',  timed: true },
+          { id: 'wu4', label: 'Warm Up (passive)', timed: true },
+          { id: 'wu5', label: 'Cooldown (active)', timed: true },
+          { id: 'wu6', label: 'Cooldown (passive)',timed: true },
+        ]},
+        { name: 'STRETCHING VIDEOS', items: [
+          { id: 'wu7', label: '3 Exercises Over 50 (Patrick DiBello)', timed: true },
+          { id: 'wu8', label: 'Cossack Squats (Patrick DiBello)',       timed: true },
+        ]},
+      ]
+    },
+    {
+      id: 'cardio', name: 'CARDIO', icon: '🏃',
+      groups: [
+        { name: 'Treadmill', items: [
+          { id: 'cd1',  label: 'HIIT Run',               timed: true },
+          { id: 'cd1b', label: 'Freestyle Run',           timed: true },
+          { id: 'cd2',  label: 'Incline Hike',            timed: true },
+          { id: 'cd2b', label: 'Freestyle Incline Hike',  timed: true },
+          { id: 'cd3',  label: 'Power Walk',              timed: true },
+          { id: 'cd3b', label: 'Freestyle Walk',          timed: true },
+        ]},
+        { name: 'Cycling', items: [
+          { id: 'cd4',  label: 'HIIT Ride',               timed: true },
+          { id: 'cd4b', label: 'Freestyle Cycle',         timed: true },
+        ]},
+        { name: 'Rowing', items: [
+          { id: 'cd5',  label: 'HIIT Row',                timed: true },
+          { id: 'cd5b', label: 'Freestyle Row',           timed: true },
+        ]},
+        { name: 'Elliptical', items: [
+          { id: 'cd6',  label: 'HIIT Glide',              timed: true },
+          { id: 'cd6b', label: 'Freestyle Glide',         timed: true },
         ]},
       ]
     },
@@ -819,6 +872,16 @@ const EXERCISES = {
         ]},
       ]
     },
+    {
+      id: 'yoga', name: 'YOGA', icon: '🧘',
+      groups: [
+        { name: '', items: [
+          { id: 'yg1', label: 'Active Standing Poses', timed: true },
+          { id: 'yg2', label: 'Core Work',             timed: true },
+          { id: 'yg3', label: 'Deep Stretches',        timed: true },
+        ]},
+      ]
+    },
   ]
 };
 
@@ -834,31 +897,65 @@ const KEY_DONE   = 'wl26_done';
 const KEY_HIST   = 'wl26_history';
 const KEY_PREFS  = 'wl26_prefs';
 const KEY_VER    = 'wl26_ver';
+const KEY_NOTES  = 'wl26_notes';
+const KEY_HIDDEN = 'wl26_hidden';
 
-const APP_VERSION = '3.4';
+const APP_VERSION = '3.5';
 
 // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
-const DEFAULT_SCHEDULE = { 0: null, 1: 'fullBody', 2: 'legsCore', 3: 'fullBody', 4: 'legsCore', 5: 'fullBody', 6: null };
+function makeDayCfg(type, opts={}) {
+  return { type, warmup: !!opts.warmup, cardio: !!opts.cardio, core: !!opts.core, yoga: !!opts.yoga };
+}
+const DEFAULT_SCHEDULE = {
+  0: makeDayCfg(null),
+  1: makeDayCfg('fullBody', { warmup: true }),
+  2: makeDayCfg('legs',     { warmup: true, core: true }),
+  3: makeDayCfg('fullBody', { warmup: true }),
+  4: makeDayCfg('legs',     { warmup: true, core: true }),
+  5: makeDayCfg('fullBody', { warmup: true }),
+  6: makeDayCfg(null),
+};
 
 let statsMode        = 'off'; // 'off' | 'auto' | 'always'
 let autoExport       = false;
-let schedule         = Object.assign({}, DEFAULT_SCHEDULE);
+let trainerNotes     = { enabled: false, notes: [] }; // { header, body }[]
+let hiddenExercises  = {}; // { itemId: true }
+let schedule         = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
 let state            = {};
 let collapsed        = {};
 let customExercises  = null;
 let editMode         = false;
+let showHidden       = false; // edit mode toggle
 let modal            = null;
 let completedDays    = {};
 let workoutHistory   = [];
 
 function loadSchedule() {
-  try { const r = localStorage.getItem(KEY_SCHED); if (r) schedule = JSON.parse(r); } catch(e) {}
+  try {
+    const r = localStorage.getItem(KEY_SCHED);
+    if (r) {
+      const s = JSON.parse(r);
+      // Migrate old format (string values) to new object format
+      Object.keys(s).forEach(k => {
+        if (s[k] === null || typeof s[k] === 'string') {
+          const oldType = s[k];
+          const type = oldType === 'legsCore' ? 'legs' : oldType;
+          s[k] = makeDayCfg(type, { warmup: !!oldType, core: oldType === 'legsCore' });
+        } else if (s[k] && s[k].type === 'legsCore') {
+          s[k].type = 'legs'; // migrate old 'legsCore' type value
+        }
+      });
+      schedule = s;
+    }
+  } catch(e) {}
 }
 function saveSchedule()      { localStorage.setItem(KEY_SCHED, JSON.stringify(schedule)); }
+function saveHidden()        { localStorage.setItem(KEY_HIDDEN, JSON.stringify(hiddenExercises)); }
+function toggleHidden(id)    { hiddenExercises[id] = !hiddenExercises[id]; if (!hiddenExercises[id]) delete hiddenExercises[id]; saveHidden(); render(); }
 function saveHistory()       { localStorage.setItem(KEY_HIST,  JSON.stringify(workoutHistory)); }
-function savePrefs()              { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode, autoExport })); }
-function setStatsMode(mode)       { statsMode = mode; savePrefs(); render(); }
-function toggleAutoExport()       { autoExport = !autoExport; savePrefs(); render(); }
+function savePrefs()        { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode, autoExport })); }
+function setStatsMode(mode) { statsMode = mode; savePrefs(); render(); }
+function toggleAutoExport() { autoExport = !autoExport; savePrefs(); render(); }
 
 function getDefaultDate() {
   const d = new Date();
@@ -875,13 +972,86 @@ function loadState() {
   try { completedDays   = JSON.parse(localStorage.getItem(KEY_DONE)) || {}; } catch(e) { completedDays = {}; }
   try { workoutHistory  = JSON.parse(localStorage.getItem(KEY_HIST)) || []; } catch(e) { workoutHistory = []; }
   try { const p = localStorage.getItem(KEY_PREFS); if (p) { const prefs = JSON.parse(p); statsMode = prefs.statsMode || 'off'; autoExport = !!prefs.autoExport; } } catch(e) {}
-  try { const r = localStorage.getItem(KEY_EX); if (r) customExercises = JSON.parse(r); } catch(e) {}
+  try { const r = localStorage.getItem(KEY_EX);    if (r) customExercises = JSON.parse(r); } catch(e) {}
+  try { const n = localStorage.getItem(KEY_NOTES); if (n) trainerNotes  = JSON.parse(n); } catch(e) {}
+  try { const h = localStorage.getItem(KEY_HIDDEN); if (h) hiddenExercises = JSON.parse(h); } catch(e) {}
+  migrateExercises();
 }
 
-function saveState()          { localStorage.setItem(KEY,      JSON.stringify(state)); }
-function saveCollapsed()      { localStorage.setItem(KEY_COL,  JSON.stringify(collapsed)); }
-function saveCustomExercises(){ localStorage.setItem(KEY_EX,   JSON.stringify(customExercises)); }
-function saveCompletedDays()  { localStorage.setItem(KEY_DONE, JSON.stringify(completedDays)); }
+function migrateExercises() {
+  // v3.5: restructure — warmup/cardio/core/yoga moved to EXERCISES.shared
+  // Migrate any stored exercises that still have them in old locations
+  if (!customExercises) return;
+  let dirty = false;
+
+  // Ensure shared array exists
+  if (!customExercises.shared) {
+    customExercises.shared = JSON.parse(JSON.stringify(EXERCISES.shared));
+    dirty = true;
+  }
+
+  // Move warmup out of legsCore if still there
+  if (customExercises.legsCore) {
+    const warmupIdx = customExercises.legsCore.findIndex(s => s.id === 'warmup');
+    if (warmupIdx !== -1) {
+      const [warmup] = customExercises.legsCore.splice(warmupIdx, 1);
+      // Ensure YOGA group exists in warmup
+      if (!warmup.groups.find(g => g.name === 'YOGA')) {
+        warmup.groups.splice(1, 0, { name: 'YOGA', items: [
+          { id: 'wu9',  label: 'Dynamic Movement (flow)', timed: true },
+          { id: 'wu10', label: 'Static Stretching (hold)',timed: true },
+        ]});
+      }
+      // Ensure all warmup items timed
+      warmup.groups.forEach(g => g.items.forEach(i => { i.timed = true; }));
+      const existing = customExercises.shared.findIndex(s => s.id === 'warmup');
+      if (existing === -1) customExercises.shared.unshift(warmup);
+      else customExercises.shared[existing] = warmup;
+      dirty = true;
+    }
+    // Move core out of legsCore if still there
+    const coreIdx = customExercises.legsCore.findIndex(s => s.id === 'core');
+    if (coreIdx !== -1) {
+      const [core] = customExercises.legsCore.splice(coreIdx, 1);
+      const existing = customExercises.shared.findIndex(s => s.id === 'core');
+      if (existing === -1) customExercises.shared.splice(2, 0, core);
+      else customExercises.shared[existing] = core;
+      dirty = true;
+    }
+    // Rename 'legs' section if it was never renamed
+    const legsSec = customExercises.legsCore.find(s => s.id === 'legs');
+    // keep as-is — just ensure legsCore only has legs section
+  }
+
+  // Move cardio out of fullBody if still there
+  if (customExercises.fullBody) {
+    const cardioIdx = customExercises.fullBody.findIndex(s => s.id === 'cardio');
+    if (cardioIdx !== -1) {
+      const [cardio] = customExercises.fullBody.splice(cardioIdx, 1);
+      const existing = customExercises.shared.findIndex(s => s.id === 'cardio');
+      if (existing === -1) customExercises.shared.splice(1, 0, cardio);
+      else customExercises.shared[existing] = cardio;
+      dirty = true;
+    }
+    // Move yoga out of fullBody if still there
+    const yogaIdx = customExercises.fullBody.findIndex(s => s.id === 'yoga');
+    if (yogaIdx !== -1) {
+      const [yoga] = customExercises.fullBody.splice(yogaIdx, 1);
+      const existing = customExercises.shared.findIndex(s => s.id === 'yoga');
+      if (existing === -1) customExercises.shared.push(yoga);
+      else customExercises.shared[existing] = yoga;
+      dirty = true;
+    }
+  }
+
+  if (dirty) saveCustomExercises();
+}
+
+function saveState()          { localStorage.setItem(KEY,        JSON.stringify(state)); }
+function saveCollapsed()      { localStorage.setItem(KEY_COL,    JSON.stringify(collapsed)); }
+function saveCustomExercises(){ localStorage.setItem(KEY_EX,     JSON.stringify(customExercises)); }
+function saveCompletedDays()  { localStorage.setItem(KEY_DONE,   JSON.stringify(completedDays)); }
+function saveTrainerNotes()   { localStorage.setItem(KEY_NOTES,  JSON.stringify(trainerNotes)); }
 
 function getExercises() { return customExercises || EXERCISES; }
 
@@ -923,14 +1093,20 @@ function getWeekDays(d) {
   });
 }
 
+function getDayCfg(d) {
+  const entry = schedule[d.getDay()];
+  if (!entry) return makeDayCfg(null);
+  if (typeof entry === 'string' || entry === null) return makeDayCfg(entry); // fallback
+  return entry;
+}
 function getWorkoutType(d) {
-  return schedule[d.getDay()] || null;
+  return getDayCfg(d).type || null;
 }
 
 const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 function getScheduledDaysLabel(type) {
   return Object.entries(schedule)
-    .filter(([,v]) => v === type)
+    .filter(([,v]) => (v?.type ?? v) === type)
     .map(([k]) => DAY_NAMES[+k])
     .join(' · ');
 }
@@ -940,25 +1116,47 @@ function hasAnyProgress(d) {
   return Object.values(ds.checked || {}).some(Boolean);
 }
 
+function getSharedSec(id) {
+  return (getExercises()['shared'] || []).filter(s => s.id === id);
+}
+function getExercisesForType(type, cfg) {
+  // cfg = { warmup, cardio, core, yoga }
+  const ex = getExercises();
+  const shared = ex['shared'] || [];
+  const sharedById = id => shared.filter(s => s.id === id);
+
+  let main = [];
+  if (type === 'combined') main = [...(ex['fullBody'] || []), ...(ex['legsCore'] || [])];
+  else if (type === 'legs') main = ex['legsCore'] || [];
+  else main = ex[type] || [];
+
+  const c = cfg || {};
+  return [
+    ...(c.warmup ? sharedById('warmup') : []),
+    ...main,
+    ...(c.cardio ? sharedById('cardio') : []),
+    ...(c.core   ? sharedById('core')   : []),
+    ...(c.yoga   ? sharedById('yoga')   : []),
+  ];
+}
+
 function getProgress(type, d) {
-  const ds    = getDayState(d);
-  const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
+  const ds = getDayState(d);
   let total = 0, done = 0;
-  types.forEach(t =>
-    getExercises()[t].forEach(sec =>
-      sec.groups.forEach(g =>
-        g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
-      )
+  getExercisesForType(type, getDayCfg(d)).forEach(sec =>
+    sec.groups.forEach(g =>
+      g.items.forEach(item => {
+        if (hiddenExercises[item.id]) return;
+        total++; if (ds.checked[item.id]) done++;
+      })
     )
   );
   return { done, total };
 }
 
 function getSectionProgress(secId, type, d) {
-  const ds    = getDayState(d);
-  const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
-  let sec = null;
-  for (const t of types) { sec = getExercises()[t].find(s => s.id === secId); if (sec) break; }
+  const ds  = getDayState(d);
+  const sec = getExercisesForType(type, getDayCfg(currentDate)).find(s => s.id === secId);
   if (!sec) return { done: 0, total: 0 };
   let total = 0, done = 0;
   sec.groups.forEach(g =>
@@ -1022,7 +1220,7 @@ function toggleSection(id) {
 function expandAll() {
   const type = getWorkoutType(currentDate);
   if (!type) return;
-  getExercises()[type].forEach(s => { collapsed[s.id] = false; });
+  getExercisesForType(type, getDayCfg(currentDate)).forEach(s => { collapsed[s.id] = false; });
   saveCollapsed();
   render();
 }
@@ -1030,7 +1228,7 @@ function expandAll() {
 function collapseAll() {
   const type = getWorkoutType(currentDate);
   if (!type) return;
-  getExercises()[type].forEach(s => { collapsed[s.id] = true; });
+  getExercisesForType(type, getDayCfg(currentDate)).forEach(s => { collapsed[s.id] = true; });
   saveCollapsed();
   render();
 }
@@ -1041,9 +1239,11 @@ function collapseAll() {
 
 function toggleEditMode() {
   editMode = !editMode;
+  if (!editMode) showHidden = false;
   modal = null;
   render();
 }
+function toggleShowHidden() { showHidden = !showHidden; render(); }
 
 function openAddModal(workoutType, sectionId, groupName) {
   modal = { type: 'add', workoutType, sectionId, groupName };
@@ -1058,10 +1258,18 @@ function openEditModal(id, workoutType, sectionId, label) {
 }
 
 function deleteExerciseDirect(id, workoutType, sectionId) {
+  const sec = getExercises()[workoutType]?.find(s => s.id === sectionId);
+  let label = id;
+  sec?.groups.forEach(g => { const item = g.items.find(i => i.id === id); if (item) label = item.label; });
+  modal = { type: 'confirmDeleteExercise', id, workoutType, sectionId, label };
+  render();
+}
+function doDeleteExercise() {
   ensureCustomExercises();
-  const sec = customExercises[workoutType].find(s => s.id === sectionId);
-  if (sec) { sec.groups.forEach(g => { g.items = g.items.filter(i => i.id !== id); }); }
+  const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+  if (sec) { sec.groups.forEach(g => { g.items = g.items.filter(i => i.id !== modal.id); }); }
   saveCustomExercises();
+  modal = null;
   render();
 }
 
@@ -1085,7 +1293,7 @@ function saveModalEdit() {
     const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
     if (sec) {
       const group = sec.groups.find(g => g.name === modal.groupName);
-      if (group) group.items.push({ id: 'u' + Date.now(), label: val });
+      if (group) group.items.push({ id: 'u' + Date.now(), label: val, custom: true });
       saveCustomExercises();
     }
   }
@@ -1248,6 +1456,33 @@ function deleteGroup(type, secId, gIdx) {
   modal = { type: 'confirmDeleteGroup', workoutType: type, sectionId: secId, groupIdx: gIdx };
   render();
 }
+function openTrainerNotesEditor() { modal = { type: 'trainerNotesEditor' }; render(); }
+function toggleTrainerNotesEnabled() { trainerNotes.enabled = !trainerNotes.enabled; saveTrainerNotes(); render(); }
+function openAddTrainerNote() { modal = { type: 'editTrainerNote', idx: -1, header: '', body: '', applies: 'all' }; render(); }
+function openEditTrainerNote(idx) {
+  const n = trainerNotes.notes[idx];
+  modal = { type: 'editTrainerNote', idx, header: n.header, body: n.body, applies: n.applies || 'all' };
+  render();
+}
+function saveTrainerNote() {
+  const header  = document.getElementById('tnote-header-input')?.value.trim();
+  const body    = document.getElementById('tnote-body-input')?.value.trim();
+  const applies = document.getElementById('tnote-applies-input')?.value || 'all';
+  if (!header) return;
+  if (modal.idx === -1) {
+    trainerNotes.notes.push({ header, body, applies });
+  } else {
+    trainerNotes.notes[modal.idx] = { header, body, applies };
+  }
+  saveTrainerNotes();
+  modal = { type: 'trainerNotesEditor' };
+  render();
+}
+function deleteTrainerNote(idx) {
+  trainerNotes.notes.splice(idx, 1);
+  saveTrainerNotes();
+  render();
+}
 function dismissWelcome() {
   localStorage.setItem(KEY_VER, APP_VERSION);
   modal = null;
@@ -1275,6 +1510,32 @@ function doDeleteGroup() {
   ensureCustomExercises();
   const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
   if (sec) { sec.groups.splice(modal.groupIdx, 1); saveCustomExercises(); }
+  modal = null;
+  render();
+}
+function openRenameSectionModal(type, secId, currentName) {
+  modal = { type: 'renameSection', workoutType: type, sectionId: secId, currentName };
+  render();
+}
+function doRenameSection() {
+  const name = document.getElementById('modal-input')?.value.trim();
+  if (!name) return;
+  ensureCustomExercises();
+  const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+  if (sec) { sec.name = name; saveCustomExercises(); }
+  modal = null;
+  render();
+}
+function openRenameGroupModal(type, secId, gIdx, currentName) {
+  modal = { type: 'renameGroup', workoutType: type, sectionId: secId, groupIdx: gIdx, currentName };
+  render();
+}
+function doRenameGroup() {
+  const name = document.getElementById('modal-input')?.value.trim();
+  if (!name) return;
+  ensureCustomExercises();
+  const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
+  if (sec?.groups[modal.groupIdx]) { sec.groups[modal.groupIdx].name = name; saveCustomExercises(); }
   modal = null;
   render();
 }
@@ -1325,11 +1586,9 @@ function showSummary() {
   const type = getWorkoutType(currentDate);
   if (!type) return;
   const ds = getDayState(currentDate);
-  const exercises = getExercises();
-  const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
   let totalDone = 0, totalAll = 0;
   const sectionSummaries = [];
-  types.forEach(t => exercises[t].forEach(sec => {
+  getExercisesForType(type, getDayCfg(currentDate)).forEach(sec => {
     let secDone = 0, secTotal = 0;
     sec.groups.forEach(g => g.items.forEach(item => {
       secTotal++;
@@ -1337,12 +1596,21 @@ function showSummary() {
       totalAll++;
     }));
     if (secDone > 0) sectionSummaries.push({ name: sec.name, done: secDone, total: secTotal });
-  }));
+  });
   const kudos = KUDOS[Math.floor(Math.random() * KUDOS.length)];
   modal = { type: 'summary', totalDone, totalAll, sectionSummaries, kudos };
   render();
 }
-function setSchedDay(i, val) { modal.draft[i] = val; render(); }
+function setSchedDay(i, type) {
+  const prev = modal.draft[i] || makeDayCfg(null);
+  modal.draft[i] = makeDayCfg(type, { warmup: prev.warmup, cardio: prev.cardio, core: prev.core, yoga: prev.yoga });
+  render();
+}
+function toggleSchedOpt(i, opt) {
+  const cur = modal.draft[i] || makeDayCfg(null);
+  modal.draft[i] = Object.assign({}, cur, { [opt]: !cur[opt] });
+  render();
+}
 function saveSettings() {
   schedule = Object.assign({}, modal.draft);
   saveSchedule();
@@ -1363,13 +1631,12 @@ function doReset() {
     const type = getWorkoutType(d);
     if (!type) return null;
     let done = 0, total = 0;
-    const types = type === 'combined' ? ['fullBody', 'legsCore'] : [type];
-    types.forEach(t => exercises[t].forEach(sec =>
+    getExercisesForType(type, getDayCfg(currentDate)).forEach(sec =>
       sec.groups.forEach(g => g.items.forEach(item => {
         total++;
         if (state[dk]?.checked?.[item.id]) done++;
       }))
-    ));
+    );
     if (total === 0) return null;
     return { date: dk, type, done, total, completed: !!completedDays[dk] };
   }).filter(Boolean);
@@ -1401,6 +1668,7 @@ function exportData() {
     workoutHistory:  JSON.parse(localStorage.getItem(KEY_HIST)  || '[]'),
     customExercises: JSON.parse(localStorage.getItem(KEY_EX)    || 'null'),
     prefs:           JSON.parse(localStorage.getItem(KEY_PREFS) || '{}'),
+    trainerNotes:    JSON.parse(localStorage.getItem(KEY_NOTES) || 'null'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
@@ -1446,6 +1714,7 @@ function doImport() {
   if (data.workoutHistory)  localStorage.setItem(KEY_HIST,   JSON.stringify(data.workoutHistory));
   if (data.customExercises) localStorage.setItem(KEY_EX,     JSON.stringify(data.customExercises));
   if (data.prefs)           localStorage.setItem(KEY_PREFS,  JSON.stringify(data.prefs));
+  if (data.trainerNotes)   localStorage.setItem(KEY_NOTES,  JSON.stringify(data.trainerNotes));
   modal = null;
   loadState();
   currentDate = getDefaultDate();
@@ -1459,7 +1728,8 @@ function doImport() {
 const DAY_LETTERS = ['M','T','W','T','F','S','S'];
 
 function renderWeekTabs() {
-  return getWeekDays(currentDate).map((d, i) => {
+  const monthAbbr = currentDate.toLocaleDateString('en-US', { month: 'short' });
+  const tabs = getWeekDays(currentDate).map((d, i) => {
     const active      = dateKey(d) === dateKey(currentDate);
     const hasProgress = hasAnyProgress(d);
     const isWeekend   = d.getDay() === 6 || d.getDay() === 0;
@@ -1471,18 +1741,29 @@ function renderWeekTabs() {
       <span class="day-dot"></span>
     </button>`;
   }).join('');
+  return `<div class="week-tabs-month">${monthAbbr}</div><div class="week-tabs">${tabs}</div>`;
 }
 
 function renderExercise(item, ds, workoutType, sectionId, gIdx, iIdx) {
+  const isHidden = !!hiddenExercises[item.id];
+
   if (editMode) {
-    return `<div class="exercise-item" style="cursor:default" data-item-idx="${iIdx}" data-group-idx="${gIdx}" data-sec-id="${sectionId}">
+    if (isHidden && !showHidden) return ''; // hidden items invisible unless showHidden is on
+    const isCustom = !!item.custom; // custom items get delete, built-ins get hide
+    const actionBtn = isHidden
+      ? `<button class="hide-btn show" onclick="toggleHidden('${item.id}')">Show</button>`
+      : isCustom
+        ? `<button class="delete-btn" onclick="deleteExerciseDirect('${item.id}','${workoutType}','${sectionId}')">✕</button>`
+        : `<button class="hide-btn" onclick="toggleHidden('${item.id}')">Hide</button>`;
+    return `<div class="exercise-item${isHidden ? ' ex-hidden' : ''}" style="cursor:default" data-item-idx="${iIdx}" data-group-idx="${gIdx}" data-sec-id="${sectionId}">
       <span class="drag-handle" ontouchstart="startExerciseDrag(event,'${workoutType}','${sectionId}',${gIdx},${iIdx})" onmousedown="startExerciseDrag(event,'${workoutType}','${sectionId}',${gIdx},${iIdx})">≡</span>
-      <button class="delete-btn" onclick="deleteExerciseDirect('${item.id}','${workoutType}','${sectionId}')">✕</button>
       <span class="exercise-label" style="cursor:pointer;flex:1" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">${esc(item.label)}</span>
-      <span style="color:var(--dim);font-size:13px;flex-shrink:0;margin-right:4px" onclick="openEditModal('${item.id}','${workoutType}','${sectionId}','${esc(item.label)}')">✎</span>
-      <span style="color:var(--dim);font-size:15px;flex-shrink:0;padding:0 2px;cursor:pointer" title="Move to…" onclick="openMoveModal('${workoutType}','${sectionId}',${gIdx},${iIdx})">⇄</span>
+      <span style="color:var(--dim);font-size:15px;flex-shrink:0;padding:0 6px;cursor:pointer" title="Move to…" onclick="openMoveModal('${workoutType}','${sectionId}',${gIdx},${iIdx})">⇄</span>
+      ${actionBtn}
     </div>`;
   }
+
+  if (isHidden) return ''; // hidden items never show in workout view
 
   const checked = !!ds.checked[item.id];
   const time    = ds.times[item.id] || 0;
@@ -1524,14 +1805,12 @@ function renderSection(sec, type, idx) {
 
   let body = '';
   if (!isCollapsed) {
-    const noteHtml = sec.rightArm
-      ? `<div class="section-note">⚡ Add extra unilateral set — right side (Jim Delgado)</div>`
-      : '';
+    const trainerNoteHtml = renderSectionTrainerNotes(sec.id);
     const groupsHtml = sec.groups.map((g, gIdx) => {
       const grpLabel = g.name
         ? `<div class="group-label" style="${editMode ? 'display:flex;align-items:center;gap:6px;padding-right:8px' : ''}">
             ${editMode ? `<span class="drag-handle" style="font-size:15px" ontouchstart="startGroupDrag(event,'${type}','${sec.id}',${gIdx})" onmousedown="startGroupDrag(event,'${type}','${sec.id}',${gIdx})">≡</span>` : ''}
-            <span style="flex:1">${g.name}</span>
+            <span style="flex:1;${editMode?'cursor:pointer':''}" onclick="${editMode?`openRenameGroupModal('${type}','${sec.id}',${gIdx},${esc(JSON.stringify(g.name))})`:''}">${g.name}${editMode ? ' <span style="color:var(--dim);font-size:11px">✎</span>' : ''}</span>
             ${editMode ? `<button class="delete-btn" style="width:20px;height:20px;font-size:11px;flex-shrink:0" onclick="deleteGroup('${type}','${sec.id}',${gIdx})">✕</button>` : ''}
            </div>`
         : '';
@@ -1544,14 +1823,14 @@ function renderSection(sec, type, idx) {
     const addGroupBtn = editMode
       ? `<button class="add-exercise-btn" style="color:var(--dim);border-top:1px dashed var(--border)" onclick="openAddGroupModal('${type}','${sec.id}')">＋ Add Subheader</button>`
       : '';
-    body = `${noteHtml}<div class="section-body">${groupsHtml}${addGroupBtn}</div>`;
+    body = `${trainerNoteHtml}<div class="section-body">${groupsHtml}${addGroupBtn}</div>`;
   }
 
   return `<div class="section" data-sec-idx="${idx}" data-sec-type="${type}">
     <div class="${headerCls}" onclick="toggleSection('${sec.id}')">
       <div class="section-left">
         ${editMode ? `<span class="drag-handle" ontouchstart="startDrag(event,${idx},'${type}')" onmousedown="startDrag(event,${idx},'${type}')">≡</span>` : ''}
-        <span class="section-name">${sec.name}</span>
+        <span class="section-name" ${editMode ? `onclick="event.stopPropagation();openRenameSectionModal('${type}','${sec.id}',${esc(JSON.stringify(sec.name))})" style="cursor:pointer"` : ''}>${sec.name}${editMode ? ' <span style="color:var(--dim);font-size:11px;font-weight:400">✎</span>' : ''}</span>
       </div>
       <div class="section-right">
         ${editMode ? `<button class="delete-btn" onclick="event.stopPropagation();deleteSection('${type}','${sec.id}')">✕</button>` : `<span class="${countCls}">${done}/${total}</span>`}
@@ -1562,16 +1841,17 @@ function renderSection(sec, type, idx) {
   </div>`;
 }
 
+// Global top-of-workout notes (all notes, collapsible)
 let trainerNoteOpen = false;
 function toggleTrainerNote() { trainerNoteOpen = !trainerNoteOpen; render(); }
 function renderTrainerNote() {
-  const body = trainerNoteOpen ? `
-    <div class="tnote-body">
-      <p><strong style="color:var(--green)">WORKOUT ADJUSTMENT</strong> <span style="color:var(--text);font-weight:normal;font-size:0.9em">(SAT APR 4 2026)</span><br>
-      Jim Delgado, CKTP, CMCE | Exercise Physiologist</p>
-      <p><strong style="color:var(--green)">RIGHT ARM</strong><span style="color:var(--green);font-weight:normal"> (extra right arm set):</span> Add a few extra unilateral sets on the right side each session.</p>
-      <p><strong style="color:var(--green)">LEGS</strong><span style="color:var(--green);font-weight:normal"> (2 Leg Days):</span> Two dedicated leg/core days. Only do treadmill cardio for a few minutes to stretch out before and after.</p>
-    </div>` : '';
+  if (!trainerNotes.enabled || !trainerNotes.notes.length) return '';
+  const body = trainerNoteOpen
+    ? `<div class="tnote-body">${trainerNotes.notes.map(n =>
+        `<p><strong style="color:var(--green);font-size:16px">${esc(n.header)}</strong><br>
+         <span style="color:var(--dim);font-size:14px;font-weight:normal">${esc(n.body).replace(/\n/g,'<br>')}</span></p>`
+      ).join('')}</div>`
+    : '';
   return `<div class="tnote">
     <div class="tnote-header" onclick="toggleTrainerNote()">
       <span>📋 Trainer Notes</span>
@@ -1579,6 +1859,16 @@ function renderTrainerNote() {
     </div>
     ${body}
   </div>`;
+}
+
+// Per-section notes — minimal inline reminder inside the section body
+function renderSectionTrainerNotes(secId) {
+  if (!trainerNotes.enabled || !trainerNotes.notes.length) return '';
+  const notes = trainerNotes.notes.filter(n => n.applies === secId);
+  if (!notes.length) return '';
+  return notes.map(n =>
+    `<div style="font-size:12px;color:var(--green);padding:4px 12px 2px;letter-spacing:0.2px">📋 ${esc(n.header)}${n.body ? ' — ' + esc(n.body.split('\n')[0]) : ''}</div>`
+  ).join('');
 }
 
 function renderModal() {
@@ -1620,7 +1910,7 @@ function renderModal() {
       body = workoutHistory.map(week => {
         const fmt = ds => { const [y,m,d] = ds.split('-'); return new Date(+y,+m-1,+d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
         const rows = week.days.map(d => {
-          const label = d.type === 'fullBody' ? 'Upper Body' : d.type === 'combined' ? 'Full Body' : 'Legs & Core';
+          const label = d.type === 'fullBody' ? 'Upper Body' : d.type === 'legs' ? 'Legs' : d.type === 'legsCore' ? 'Legs' : d.type === 'combined' ? 'Full Body' : d.type;
           const pct   = d.total ? Math.round((d.done / d.total) * 100) : 0;
           const tick  = d.completed ? `<span style="color:var(--green)">☑</span>` : `<span style="color:var(--dim)">☐</span>`;
           return `<div class="hist-row">
@@ -1709,6 +1999,18 @@ function renderModal() {
       </div>
     </div>`;
   }
+  if (modal.type === 'confirmDeleteExercise') {
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Delete Exercise</h3>
+        <p>Delete <strong>${esc(modal.label)}</strong>? This cannot be undone.</p>
+        <div class="modal-actions" style="margin-top:16px">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn danger" onclick="doDeleteExercise()">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'moveEx') {
     const { workoutType, sectionId, groupIdx, itemIdx } = modal;
     const allSecs = getExercises()[workoutType] || [];
@@ -1736,9 +2038,8 @@ function renderModal() {
     </div>`;
   }
   if (modal.type === 'addGroup') {
-    const types = modal.workoutType === 'combined' ? ['fullBody','legsCore'] : [modal.workoutType];
     let secName = modal.sectionId;
-    for (const t of types) { const s = getExercises()[t]?.find(s => s.id === modal.sectionId); if (s) { secName = s.name; break; } }
+    { const s = getExercisesForType(modal.workoutType, getDayCfg(currentDate)).find(s => s.id === modal.sectionId); if (s) secName = s.name; }
     return `<div class="modal-overlay centered" onclick="closeModal()">
       <div class="modal" onclick="event.stopPropagation()">
         <h3>Add Subheader</h3>
@@ -1763,12 +2064,100 @@ function renderModal() {
       </div>
     </div>`;
   }
+  if (modal.type === 'renameSection') {
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Rename Section</h3>
+        <input id="modal-input" class="modal-input" type="text" value="${esc(modal.currentName)}" placeholder="Section name">
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="doRenameSection()">Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'renameGroup') {
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Rename Subheader</h3>
+        <input id="modal-input" class="modal-input" type="text" value="${esc(modal.currentName)}" placeholder="Subheader name">
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="doRenameGroup()">Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'trainerNotesEditor') {
+    const appliesLabel = {
+      all: 'All Workouts', chest: 'CHEST', lats: 'LATS', shoulders: 'SHOULDERS',
+      back: 'BACK', biceps: 'BICEPS', triceps: 'TRICEPS', forearms: 'FOREARMS',
+      cardio: 'CARDIO', warmup: 'WARM UP', legs: 'LEGS + GLUTES', core: 'ABS + CORE'
+    };
+    const noteRows = trainerNotes.notes.map((n, i) =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;cursor:pointer" onclick="openEditTrainerNote(${i})">
+          <div style="font-weight:700;color:var(--green);font-size:15px">${esc(n.header)}</div>
+          <div style="font-size:12px;color:var(--dim);margin-top:2px">${appliesLabel[n.applies || 'all'] || 'All Days'} · ${esc((n.body || '').split('\n')[0].substring(0,50))}</div>
+        </div>
+        <button class="delete-btn" onclick="deleteTrainerNote(${i})">✕</button>
+      </div>`
+    ).join('');
+    const emptyMsg = trainerNotes.notes.length === 0
+      ? `<p style="color:var(--dim);font-size:14px;text-align:center;padding:16px 0">No notes yet. Tap + Add Note to get started.</p>`
+      : '';
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()" style="max-height:80vh;display:flex;flex-direction:column">
+        <h3>📋 Trainer Notes</h3>
+        <div style="overflow-y:auto;flex:1">${noteRows}${emptyMsg}</div>
+        <div class="modal-actions" style="margin-top:12px;flex-wrap:wrap;gap:8px">
+          <button class="modal-btn cancel" onclick="closeModal()" style="flex:1">Done</button>
+          <button class="modal-btn confirm" onclick="openAddTrainerNote()" style="flex:1">+ Add Note</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'editTrainerNote') {
+    const isNew = modal.idx === -1;
+    const appliesOpts = [
+      { val: 'all',       label: 'All Workouts (top of screen)' },
+      { val: 'chest',     label: 'Upper Body — CHEST' },
+      { val: 'lats',      label: 'Upper Body — LATS' },
+      { val: 'shoulders', label: 'Upper Body — SHOULDERS' },
+      { val: 'back',      label: 'Upper Body — BACK' },
+      { val: 'biceps',    label: 'Upper Body — BICEPS' },
+      { val: 'triceps',   label: 'Upper Body — TRICEPS' },
+      { val: 'forearms',  label: 'Upper Body — FOREARMS' },
+      { val: 'cardio',    label: 'Upper Body — CARDIO' },
+      { val: 'warmup',    label: 'Optional — WARM UP / COOL DOWN' },
+      { val: 'legs',      label: 'Legs — LEGS + GLUTES' },
+      { val: 'core',      label: 'Optional — ABS + CORE' },
+    ];
+    const appliesSelect = appliesOpts.map(o =>
+      `<option value="${o.val}"${modal.applies === o.val ? ' selected' : ''}>${o.label}</option>`
+    ).join('');
+    return `<div class="modal-overlay centered" onclick="event.stopPropagation()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>${isNew ? 'Add Note' : 'Edit Note'}</h3>
+        <label style="font-size:13px;color:var(--dim);display:block;margin-bottom:4px">Header (bold, displayed prominently)</label>
+        <input id="tnote-header-input" class="modal-input" type="text" placeholder="e.g. RIGHT ARM" value="${esc(modal.header)}" style="margin-bottom:12px">
+        <label style="font-size:13px;color:var(--dim);display:block;margin-bottom:4px">Body (one item per line)</label>
+        <textarea id="tnote-body-input" class="modal-input" rows="5" placeholder="Add extra unilateral sets on the right side each session." style="resize:vertical;font-family:inherit;margin-bottom:12px">${esc(modal.body)}</textarea>
+        <label style="font-size:13px;color:var(--dim);display:block;margin-bottom:4px">Applies to</label>
+        <select id="tnote-applies-input" class="modal-input" style="margin-bottom:4px">${appliesSelect}</select>
+        <div class="modal-actions" style="margin-top:14px">
+          <button class="modal-btn cancel" onclick="modal={type:'trainerNotesEditor'};render()">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveTrainerNote()">Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'welcome') {
     return `<div class="modal-overlay centered" onclick="event.stopPropagation()">
       <div class="modal" onclick="event.stopPropagation()">
         <h3>👋 Welcome to Workout Log</h3>
         <p style="font-size:13px;color:var(--dim);margin-bottom:4px">Version ${APP_VERSION}</p>
-        <div style="font-size:14px;line-height:1.7;margin-bottom:18px">
+        <div style="font-size:16px;line-height:1.7;margin-bottom:18px">
           <p style="margin-bottom:10px">Here's what's new:</p>
           <ul style="padding-left:18px;margin:0;color:var(--dim)">
             <li>Reorder sections, subheaders &amp; exercises by dragging ≡</li>
@@ -1777,7 +2166,7 @@ function renderModal() {
             <li>Rest day now links directly to Settings</li>
           </ul>
         </div>
-        <p style="font-size:13px;color:var(--dim);margin-bottom:18px">Start by tapping today's day tab at the top, then check off exercises as you go. Tap <strong>Finish</strong> when done.</p>
+        <p style="font-size:15px;color:var(--dim);margin-bottom:18px">Start by tapping today's day tab at the top, then check off exercises as you go. Tap <strong>Finish</strong> when done.</p>
         <button class="modal-btn confirm" style="width:100%" onclick="dismissWelcome()">Let's Go</button>
       </div>
     </div>`;
@@ -1785,7 +2174,8 @@ function renderModal() {
   if (modal.type === 'help') {
     return `<div class="modal-overlay" onclick="closeModal()">
       <div class="modal help-modal" onclick="event.stopPropagation()">
-        <h3>❓ Help</h3>
+        <div class="help-modal-body">
+        <h3 style="margin-top:8px">❓ Help</h3>
 
         <div class="help-tip">💡 For updates, visit the app URL in Safari once — no reinstall needed. Only reinstall when the icon or app title changes.</div>
 
@@ -1800,8 +2190,8 @@ function renderModal() {
         <div class="help-section">
           <div class="help-section-hdr">Workout Types</div>
           <div class="help-row"><span class="help-key">Upper Body</span><span class="help-val">Chest, Lats, Shoulders, Back, Biceps, Triceps, Forearms, Cardio, Stretching</span></div>
-          <div class="help-row"><span class="help-key">Legs & Core</span><span class="help-val">Warm Up, Legs + Glutes, Abs + Core</span></div>
-          <div class="help-row"><span class="help-key">Full Body</span><span class="help-val">Both Upper Body and Legs & Core combined in one view</span></div>
+          <div class="help-row"><span class="help-key">Legs</span><span class="help-val">Legs + Glutes</span></div>
+          <div class="help-row"><span class="help-key">Full Body</span><span class="help-val">Upper Body and Legs combined in one view</span></div>
         </div>
 
         <div class="help-section">
@@ -1833,9 +2223,10 @@ function renderModal() {
           <div class="help-section-hdr">Start New Week</div>
           <div class="help-row"><span class="help-key">↻ Button</span><span class="help-val">Archives the current week to History, then clears all checked exercises. Requires two confirmations.</span></div>
         </div>
+        </div>
 
         <div class="modal-actions">
-          <button class="modal-btn confirm" onclick="closeModal()">Close</button>
+          <button class="modal-btn confirm" style="width:100%" onclick="closeModal()">Close</button>
         </div>
       </div>
     </div>`;
@@ -1843,14 +2234,26 @@ function renderModal() {
   if (modal.type === 'schedule') {
     const days = [['Mon',1],['Tue',2],['Wed',3],['Thu',4],['Fri',5],['Sat',6],['Sun',0]];
     const rows = days.map(([name, i]) => {
-      const cur = modal.draft[i];
+      const cur = modal.draft[i] || makeDayCfg(null);
+      const t = cur.type;
+      const isRest = !t;
+      const optRow = isRest ? '' : `
+        <div class="sched-opts-optional">
+          <button class="sched-opt-btn${cur.warmup?' sel':''}" onclick="toggleSchedOpt(${i},'warmup')">Warm Up</button>
+          <button class="sched-opt-btn${cur.cardio?' sel':''}" onclick="toggleSchedOpt(${i},'cardio')">Cardio</button>
+          <button class="sched-opt-btn${cur.core  ?' sel':''}" onclick="toggleSchedOpt(${i},'core')">Abs + Core</button>
+          <button class="sched-opt-btn${cur.yoga  ?' sel':''}" onclick="toggleSchedOpt(${i},'yoga')">Yoga</button>
+        </div>`;
       return `<div class="sched-row">
         <span class="sched-day">${name}</span>
-        <div class="sched-opts">
-          <button class="sched-btn${cur==='fullBody'?' sel':''}" onclick="setSchedDay(${i},'fullBody')">Upper Body</button>
-          <button class="sched-btn${cur==='legsCore'?' sel':''}" onclick="setSchedDay(${i},'legsCore')">Legs &amp; Core</button>
-          <button class="sched-btn${cur==='combined'?' sel':''}" onclick="setSchedDay(${i},'combined')">Full Body</button>
-          <button class="sched-btn${cur===null?' sel':''}" onclick="setSchedDay(${i},null)">Rest</button>
+        <div class="sched-col">
+          <div class="sched-opts">
+            <button class="sched-btn${t==='fullBody'?' sel':''}" onclick="setSchedDay(${i},'fullBody')">Upper Body</button>
+            <button class="sched-btn${t==='legs'?' sel':''}" onclick="setSchedDay(${i},'legs')">Legs</button>
+            <button class="sched-btn${t==='combined'?' sel':''}" onclick="setSchedDay(${i},'combined')">Full Body</button>
+            <button class="sched-btn${isRest?' sel':''}" onclick="setSchedDay(${i},null)">Rest</button>
+          </div>
+          ${optRow}
         </div>
       </div>`;
     }).join('');
@@ -1874,22 +2277,39 @@ function renderModal() {
           </div>
 
           <div class="settings-section">
+            <div class="settings-section-hdr">📋 Trainer Notes</div>
+            <div class="export-row" style="cursor:pointer" onclick="openTrainerNotesEditor()">
+              <div class="export-row-info">
+                <span class="export-row-label">Show on workout screen</span>
+                <span class="export-row-sub">Tap to manage notes shown in each section</span>
+              </div>
+              <button class="export-toggle${trainerNotes.enabled ? ' on' : ''}" onclick="event.stopPropagation();toggleTrainerNotesEnabled()">${trainerNotes.enabled ? 'ON' : 'OFF'}</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-hdr">💾 Data Backup &amp; Restore</div>
+            <div class="export-row">
+              <div class="export-row-info">
+                <span class="export-row-label">Auto-Export on Finish</span>
+                <span class="export-row-sub">Saves JSON backup after each workout</span>
+              </div>
+              <button class="export-toggle${autoExport ? ' on' : ''}" onclick="toggleAutoExport()">${autoExport ? 'ON' : 'OFF'}</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="modal-btn cancel" style="flex:1" onclick="exportData()">⬇ Export</button>
+              <button class="modal-btn cancel" style="flex:1" onclick="triggerImport()">📂 Import</button>
+            </div>
+            <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="readImportFile(this)">
+          </div>
+
+          <div class="settings-section">
             <div class="settings-section-hdr">🛠 Tools</div>
             <div class="settings-tools">
               <button class="modal-btn cancel" onclick="openEditFromSettings()">✎ Edit Exercises</button>
               <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
             </div>
             <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="openHelp()">❓ Help</button>
-            <div class="export-row">
-              <div class="export-row-info">
-                <span class="export-row-label">Auto-Export on Finish</span>
-                <span class="export-row-sub">Saves JSON backup to Files after each workout</span>
-              </div>
-              <button class="export-toggle${autoExport ? ' on' : ''}" onclick="toggleAutoExport()">${autoExport ? 'ON' : 'OFF'}</button>
-            </div>
-            <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="exportData()">⬇ Export Data Now</button>
-            <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="triggerImport()">📂 Import Backup</button>
-            <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="readImportFile(this)">
           </div>
         </div>
 
@@ -1964,7 +2384,8 @@ function renderStatsCard() {
 }
 
 function render() {
-  const type = getWorkoutType(currentDate);
+  const cfg  = getDayCfg(currentDate);
+  const type = cfg.type;
 
   const isDone  = type ? !!completedDays[dateKey(currentDate)] : false;
   const editBtn = type
@@ -1979,7 +2400,7 @@ function render() {
   if (type) {
     const { done, total } = getProgress(type, currentDate);
     const pct   = total ? Math.round((done / total) * 100) : 0;
-    const label = type === 'fullBody' ? 'UPPER BODY' : type === 'combined' ? 'FULL BODY' : 'LEGS & CORE';
+    const label = type === 'fullBody' ? 'UPPER BODY' : type === 'legs' ? 'LEGS' : type === 'combined' ? 'FULL BODY' : '';
     const days  = getScheduledDaysLabel(type);
     headerMeta = `
     <div class="workout-meta">
@@ -1992,21 +2413,36 @@ function render() {
         <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       </div>`}
     </div>
-    ${editMode ? '' : `<div class="expand-btns">
+    ${editMode
+      ? `<div class="expand-btns"><span class="show-hidden-toggle" onclick="toggleShowHidden()">${showHidden ? '🙈 Hide hidden items' : '👁 Show hidden items'}</span></div>`
+      : `<div class="expand-btns">
       <button class="expand-btn" onclick="expandAll()">▾ Expand All</button>
       <button class="expand-btn" onclick="collapseAll()">▸ Collapse All</button>
     </div>`}`;
   }
 
   let content;
-  if (type === 'combined') {
-    content = [
-      ...getExercises()['fullBody'].map((s, i) => renderSection(s, 'fullBody', i)),
-      ...getExercises()['legsCore'].map((s, i) => renderSection(s, 'legsCore', i))
-    ].join('');
-  } else if (type) {
-    content = getExercises()[type].map((s, i) => renderSection(s, type, i)).join('') +
-      (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '');
+  if (type) {
+    const ex = getExercises();
+    const shared = ex['shared'] || [];
+    const sharedById = id => shared.filter(s => s.id === id);
+
+    let mainSecs = [];
+    if (type === 'combined') mainSecs = [...(ex['fullBody'] || []), ...(ex['legsCore'] || [])];
+    else if (type === 'legs') mainSecs = ex['legsCore'] || [];
+    else mainSecs = ex[type] || [];
+
+    const sections = [
+      ...(cfg.warmup ? sharedById('warmup') : []),
+      ...mainSecs,
+      ...(cfg.cardio ? sharedById('cardio') : []),
+      ...(cfg.core   ? sharedById('core')   : []),
+      ...(cfg.yoga   ? sharedById('yoga')   : []),
+    ];
+    content = sections.map((s, i) => {
+      const srcType = ['warmup','cardio','core','yoga'].includes(s.id) ? 'shared' : (type === 'legs' ? 'legsCore' : type);
+      return renderSection(s, srcType, i);
+    }).join('') + (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '');
   } else {
     const isToday = dateKey(currentDate) === dateKey(new Date());
     content = `<div class="rest-day">
@@ -2025,13 +2461,13 @@ function render() {
   document.getElementById('app').innerHTML = `
     <div class="app-header">
       <div class="app-title-row">
-        <div class="app-title">🏋🏽 Workout Log | 2026 ${streakBadge}</div>
+        <div class="app-title">🏋🏽 Workout Log | ${new Date().getFullYear()} ${streakBadge}</div>
         <div class="header-actions">
           <button class="icon-btn" onclick="openSettings()" title="Schedule">⚙︎</button>
           ${editBtn}
         </div>
       </div>
-      <div class="week-tabs">${renderWeekTabs()}</div>
+      <div class="week-tabs-wrapper">${renderWeekTabs()}</div>
       ${renderStatsCard()}
       ${headerMeta}
     </div>
