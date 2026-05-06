@@ -1417,7 +1417,7 @@ function saveNewGroup() {
   if (!val) return;
   ensureCustomExercises();
   const sec = customExercises[modal.workoutType].find(s => s.id === modal.sectionId);
-  if (sec) { sec.groups.push({ name: val, items: [] }); saveCustomExercises(); }
+  if (sec) { sec.groups.push({ name: val, items: [], custom: true }); saveCustomExercises(); }
   modal = null;
   render();
 }
@@ -1426,7 +1426,7 @@ function saveNewSection() {
   if (!val) return;
   ensureCustomExercises();
   customExercises[modal.workoutType].push({
-    id: 'sec_' + Date.now(), name: val, icon: '',
+    id: 'sec_' + Date.now(), name: val, icon: '', custom: true,
     groups: [{ name: '', items: [] }], rightArm: false
   });
   saveCustomExercises();
@@ -1911,7 +1911,7 @@ function renderSection(sec, type, idx) {
         ? `<div class="group-label" style="${editMode ? 'display:flex;align-items:center;gap:6px;padding-right:8px' : ''}">
             ${editMode ? `<span class="drag-handle" style="font-size:15px" ontouchstart="startGroupDrag(event,'${type}','${sec.id}',${gIdx})" onmousedown="startGroupDrag(event,'${type}','${sec.id}',${gIdx})">≡</span>` : ''}
             <span style="flex:1;${editMode?'cursor:pointer':''}" onclick="${editMode?`openRenameGroupModal('${type}','${sec.id}',${gIdx},${esc(JSON.stringify(g.name))})`:''}">${g.name}${editMode ? ' <span style="color:var(--dim);font-size:11px">✎</span>' : ''}</span>
-            ${editMode ? `<button class="delete-btn" style="width:20px;height:20px;font-size:11px;flex-shrink:0" onclick="deleteGroup('${type}','${sec.id}',${gIdx})">✕</button>` : ''}
+            ${editMode && g.custom ? `<button class="delete-btn" style="width:20px;height:20px;font-size:11px;flex-shrink:0" onclick="deleteGroup('${type}','${sec.id}',${gIdx})">✕</button>` : ''}
            </div>`
         : '';
       const items  = g.items.map((item, iIdx) => renderExercise(item, ds, type, sec.id, gIdx, iIdx)).join('');
@@ -1933,7 +1933,7 @@ function renderSection(sec, type, idx) {
         <span class="section-name" ${editMode ? `onclick="event.stopPropagation();openRenameSectionModal('${type}','${sec.id}',${esc(JSON.stringify(sec.name))})" style="cursor:pointer"` : ''}>${sec.name}${editMode ? ' <span style="color:var(--dim);font-size:11px;font-weight:400">✎</span>' : ''}</span>
       </div>
       <div class="section-right">
-        ${editMode ? `<button class="delete-btn" onclick="event.stopPropagation();deleteSection('${type}','${sec.id}')">✕</button>` : `<span class="${countCls}">${done}/${total}</span>`}
+        ${editMode && sec.custom ? `<button class="delete-btn" onclick="event.stopPropagation();deleteSection('${type}','${sec.id}')">✕</button>` : `<span class="${countCls}">${done}/${total}</span>`}
         <span class="${chevronCls}">▾</span>
       </div>
     </div>
