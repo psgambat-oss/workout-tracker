@@ -1,5 +1,9 @@
 # Workout Tracker Changelog
 
+## v3.5.4 — 2026-05-05
+- **Delete protection**: ✕ delete button on sections and subheaders now only appears on user-created ones — built-in sections and subheaders can no longer be accidentally deleted
+- **Custom flag**: Newly added sections and subheaders are marked `custom: true` so they remain deletable
+
 ## v3.5.3 — 2026-05-05
 - **🎬 Video links**: Add a YouTube or web URL to any exercise via Edit mode — a 🎬 icon appears on the exercise row and taps open the video in the browser
 - **Removed video sub-sections**: STRETCHING VIDEOS (Warm Up/Cooldown) and Core Videos (Abs + Core) removed from default exercises — add your own via the 🎬 URL field instead
