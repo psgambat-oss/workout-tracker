@@ -1842,6 +1842,11 @@ const KUDOS = [
   "Strong work today. Your future self thanks you."
 ];
 
+function confirmFinish() {
+  modal = { type: 'confirmFinish' };
+  render();
+}
+
 function markComplete() {
   completedDays[dateKey(currentDate)] = true;
   saveCompletedDays();
@@ -2150,6 +2155,33 @@ function renderSectionTrainerNotes(secId) {
 
 function renderModal() {
   if (!modal) return '';
+  if (modal.type === 'confirmFinish') {
+    const ds = getDayState(currentDate);
+    const type = getWorkoutType(currentDate);
+    let done = 0, total = 0;
+    if (type) {
+      getExercisesForType(type, getDayCfg(currentDate)).forEach(sec =>
+        sec.groups.forEach(g => g.items.forEach(item => {
+          total++;
+          if (ds.checked[item.id]) done++;
+        }))
+      );
+    }
+    const incomplete = total - done;
+    const msg = incomplete > 0
+      ? `You still have <strong>${incomplete} exercise${incomplete > 1 ? 's' : ''}</strong> unchecked. Are you sure you want to finish?`
+      : `All exercises complete. Ready to finish your workout?`;
+    return `<div class="modal-overlay">
+      <div class="modal">
+        <h3>Finish Workout?</h3>
+        <p>${msg}</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeModal()">Not yet</button>
+          <button class="modal-btn confirm" onclick="closeModal();markComplete()">Yes, finish</button>
+        </div>
+      </div>
+    </div>`;
+  }
   if (modal.type === 'resetStep1') {
     const weekDays  = getWeekDays(currentDate);
     const weekStart = weekDays[0];
@@ -2801,7 +2833,7 @@ function render() {
         ? `<button class="edit-toggle active" onclick="toggleEditMode()">Done</button>`
         : isDone
           ? `<button class="complete-btn" onclick="showSummary()">✓ Complete</button>`
-          : `<button class="finish-btn" onclick="markComplete()">Finish</button>`)
+          : `<button class="finish-btn" onclick="confirmFinish()">Finish</button>`)
     : '';
 
   let headerMeta = '';

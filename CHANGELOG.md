@@ -1,5 +1,8 @@
 # Workout Tracker Changelog
 
+## v3.8 — 2026-04-20
+- **Finish confirmation**: Tapping Finish now shows a confirmation popup before marking the workout complete. If exercises are still unchecked, the popup shows how many remain so you can go back and finish them.
+
 ## v3.7 — 2026-05-07
 - **Auto week rollover**: On first open of a new week, the previous week is automatically archived to History and exercises cleared — no manual action needed
 - **Toast notification**: "📦 Last week archived automatically" appears briefly after auto-rollover
