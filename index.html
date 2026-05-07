@@ -392,6 +392,22 @@
 
     .reset-btn:active { background: rgba(255,69,58,0.25); }
 
+    .auto-rollover-toast {
+      position: fixed;
+      top: 70px; left: 50%; transform: translateX(-50%);
+      background: var(--green);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 20px;
+      z-index: 9999;
+      white-space: nowrap;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      opacity: 1;
+      transition: opacity 0.4s ease;
+    }
+
     /* ── MODAL ── */
     .modal-overlay {
       position: fixed;
@@ -929,6 +945,7 @@ const KEY_PREFS  = 'wl26_prefs';
 const KEY_VER    = 'wl26_ver';
 const KEY_NOTES  = 'wl26_notes';
 const KEY_HIDDEN = 'wl26_hidden';
+const KEY_WEEK   = 'wl26_week';   // stores last known Monday date string for auto-rollover
 
 const APP_VERSION = '3.6';
 
@@ -962,6 +979,7 @@ let showHidden       = false; // edit mode toggle
 let modal            = null;
 let completedDays    = {};
 let workoutHistory   = [];
+let pendingToast     = null; // set to a message string to show a one-time toast on next render
 
 function loadSchedule() {
   try {
@@ -1049,6 +1067,62 @@ function loadState() {
   try { const n = localStorage.getItem(KEY_NOTES); if (n) trainerNotes  = JSON.parse(n); } catch(e) {}
   try { const h = localStorage.getItem(KEY_HIDDEN); if (h) hiddenExercises = JSON.parse(h); } catch(e) {}
   migrateExercises();
+  checkAutoRollover();
+}
+
+function checkAutoRollover() {
+  const currentWeekStart = dateKey(getMonday(currentDate));
+  const storedWeekStart  = localStorage.getItem(KEY_WEEK) || '';
+  if (!storedWeekStart) {
+    // First run — just record the current week, no rollover
+    localStorage.setItem(KEY_WEEK, currentWeekStart);
+    return;
+  }
+  if (storedWeekStart !== currentWeekStart) {
+    // New week detected — silently archive the old week and clear
+    doAutoReset(storedWeekStart);
+    localStorage.setItem(KEY_WEEK, currentWeekStart);
+  }
+}
+
+function doAutoReset(oldWeekStartStr) {
+  const oldMonday = new Date(oldWeekStartStr + 'T00:00:00');
+  const oldWeekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(oldMonday);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+  const weekEnd = dateKey(oldWeekDays[6]);
+
+  // Build per-day archive summary
+  const days = oldWeekDays.map(d => {
+    const dk   = dateKey(d);
+    const type = getWorkoutType(d);
+    if (!type) return null;
+    let done = 0, total = 0;
+    getExercisesForType(type, getDayCfg(d)).forEach(sec =>
+      sec.groups.forEach(g => g.items.forEach(item => {
+        total++;
+        if (state[dk]?.checked?.[item.id]) done++;
+      }))
+    );
+    if (total === 0) return null;
+    return { date: dk, type, done, total, completed: !!completedDays[dk] };
+  }).filter(Boolean);
+
+  if (days.length > 0) {
+    workoutHistory.unshift({ weekStart: oldWeekStartStr, weekEnd, days });
+    saveHistory();
+  }
+
+  // Clear old week data
+  oldWeekDays.forEach(d => {
+    delete state[dateKey(d)];
+    delete completedDays[dateKey(d)];
+  });
+  saveState();
+  saveCompletedDays();
+  pendingToast = '📦 Last week archived automatically';
 }
 
 function migrateExercises() {
@@ -1845,6 +1919,7 @@ function doReset() {
   });
   saveState();
   saveCompletedDays();
+  localStorage.setItem(KEY_WEEK, dateKey(getMonday(currentDate)));
   modal = null;
   render();
 }
@@ -2534,6 +2609,7 @@ function renderModal() {
               <button class="modal-btn cancel" onclick="openHistory()">📋 History</button>
             </div>
             <button class="modal-btn cancel" style="width:100%;margin-top:8px" onclick="openHelp()">❓ Help</button>
+            <button class="modal-btn cancel" style="width:100%;margin-top:8px;color:var(--accent)" onclick="closeModal();confirmReset()">↻ Start New Week</button>
           </div>
         </div>
 
@@ -2822,11 +2898,22 @@ function render() {
     </div>
     ${renderTrainerNote()}
     ${content}
-    <div class="app-footer">
-      <button class="reset-btn" onclick="confirmReset()">↻&nbsp; START NEW WEEK</button>
-    </div>
+    ${currentDate.getDay() === 0
+      ? `<div class="app-footer"><button class="reset-btn" onclick="confirmReset()">↻&nbsp; START NEW WEEK</button></div>`
+      : ''}
     ${renderModal()}
+    ${pendingToast ? `<div class="auto-rollover-toast" id="auto-rollover-toast">${pendingToast}</div>` : ''}
   `;
+
+  // Fire-and-forget toast auto-dismiss
+  if (pendingToast) {
+    pendingToast = null;
+    setTimeout(() => {
+      const t = document.getElementById('auto-rollover-toast');
+      if (t) { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }
+    }, 4000);
+  }
+
   // Restore Settings scroll position after DOM rebuild (two rAF frames for full layout)
   if (_settingsScroll > 0) {
     requestAnimationFrame(() => requestAnimationFrame(() => {
