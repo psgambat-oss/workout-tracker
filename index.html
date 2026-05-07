@@ -807,10 +807,10 @@ const EXERCISES = {
       id: 'legs', name: 'LEGS + GLUTES', icon: '🦵',
       groups: [
         { name: 'Leg Presses', items: [
-          { id: 'lg1',  label: 'Machine incline seated x2 leg' },
-          { id: 'lg2',  label: 'Machine incline seated x1 leg' },
-          { id: 'lg3',  label: 'Machine reg x2 leg' },
-          { id: 'lg4',  label: 'Machine reg seated x1 leg' },
+          { id: 'lg1',  label: 'Machine w/ plates incline seated x2 leg' },
+          { id: 'lg2',  label: 'Machine w/ plates incline seated x1 leg' },
+          { id: 'lg3',  label: 'Machine seated x2 leg' },
+          { id: 'lg4',  label: 'Machine seated x1 leg' },
         ]},
         { name: 'Leg Extensions', items: [
           { id: 'lg5',  label: 'Machine forward seated x2 — Leg Extension' },
@@ -828,7 +828,12 @@ const EXERCISES = {
           { id: 'lg13', label: 'Dumbbell' },
         ]},
         { name: 'Glutes', items: [
-          { id: 'lg14', label: 'Glute Back Press machine' },
+          { id: 'lg14', label: 'Machine standing press back' },
+          { id: 'lg19', label: 'Machine strapped in glute lift' },
+          { id: 'lg20', label: 'Bench hip thrust' },
+          { id: 'lg21', label: 'Bench hip thrust w/ weight' },
+          { id: 'lg22', label: 'Bench Bulgarian split squat' },
+          { id: 'lg23', label: 'Bench Bulgarian split squat w/ weight' },
         ]},
         { name: 'Hip Abduction', items: [
           { id: 'lg15', label: 'Machine — push legs OUT' },
@@ -847,8 +852,8 @@ const EXERCISES = {
       id: 'warmup', name: 'WARM UP / COOLDOWN', icon: '🚶',
       groups: [
         { name: 'CARDIO', items: [
-          { id: 'wu1', label: 'Treadmill Warm Up Walk',   timed: true },
-          { id: 'wu2', label: 'Treadmill Cooldown Walk',  timed: true },
+          { id: 'wu1', label: 'Treadmill Warm Up Walk',  timed: true },
+          { id: 'wu2', label: 'Treadmill Cooldown Walk', timed: true },
         ]},
         { name: 'YOGA', items: [
           { id: 'wu9',  label: 'Dynamic Movement (flow)', timed: true },
@@ -1220,13 +1225,13 @@ function migrateExercises() {
     if (svIdx !== -1) { sharedWarmup.groups.splice(svIdx, 1); dirty = true; }
     // Remove "(5-10 min)" from any labels & fix "Warmup" → "Warm Up"
     sharedWarmup.groups.forEach(g => g.items.forEach(item => {
-      const fixed = item.label.replace(/\s*\(5-10 min\)/gi, '').replace(/\bWarmup\b/g, 'Warm Up');
+      const fixed = item.label.replace(/\s*\(5\s*-\s*10 min\)/gi, '').replace(/\bWarmup\b/g, 'Warm Up');
       if (fixed !== item.label) { item.label = fixed; dirty = true; }
       item.timed = true;
     }));
   }
 
-  // Remove old standalone Stretching section (merged into Warm Up / Cool Down)
+  // Remove old standalone Stretching section (merged into Warm Up / Cooldown)
   if (customExercises.fullBody) {
     const stretchIdx = customExercises.fullBody.findIndex(s => s.id === 'stretching');
     if (stretchIdx !== -1) { customExercises.fullBody.splice(stretchIdx, 1); dirty = true; }
@@ -1257,6 +1262,11 @@ function migrateExercises() {
     if (!sections) return;
     sections.forEach(sec => sec.groups && sec.groups.forEach(g => g.items && g.items.forEach(item => {
       if (item.id === 'co10' && item.label === 'Mat side ankle touch') { item.label = 'Mat heel touch'; dirty = true; }
+      if (item.id === 'lg1'  && item.label === 'Machine incline seated x2 leg') { item.label = 'Machine w/ plates incline seated x2 leg'; dirty = true; }
+      if (item.id === 'lg2'  && item.label === 'Machine incline seated x1 leg') { item.label = 'Machine w/ plates incline seated x1 leg'; dirty = true; }
+      if (item.id === 'lg3'  && item.label === 'Machine reg x2 leg') { item.label = 'Machine seated x2 leg'; dirty = true; }
+      if (item.id === 'lg4'  && item.label === 'Machine reg seated x1 leg') { item.label = 'Machine seated x1 leg'; dirty = true; }
+      if (item.id === 'lg14' && item.label === 'Glute Back Press machine') { item.label = 'Machine standing press back'; dirty = true; }
     })));
   };
   fixLabels(customExercises.shared);
@@ -1274,6 +1284,24 @@ function migrateExercises() {
       dirty = true;
     }
   });
+
+  // Add missing Glutes items if not present
+  const legsSection = customExercises.legsCore?.find(s => s.id === 'legs');
+  if (legsSection) {
+    const glutes = legsSection.groups?.find(g => g.name === 'Glutes');
+    if (glutes) {
+      const gluteAdd = [
+        { id: 'lg19', label: 'Machine strapped in glute lift' },
+        { id: 'lg20', label: 'Bench hip thrust' },
+        { id: 'lg21', label: 'Bench hip thrust w/ weight' },
+        { id: 'lg22', label: 'Bench Bulgarian split squat' },
+        { id: 'lg23', label: 'Bench Bulgarian split squat w/ weight' },
+      ];
+      gluteAdd.forEach(ex => {
+        if (!glutes.items.find(i => i.id === ex.id)) { glutes.items.push(ex); dirty = true; }
+      });
+    }
+  }
 
   // Remove Core Videos group if present (removed from defaults in v3.5.3)
   [customExercises.shared, customExercises.legsCore].forEach(sections => {
