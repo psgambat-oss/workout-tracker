@@ -1,5 +1,11 @@
 # Workout Tracker Changelog
 
+## v3.7 — 2026-05-07
+- **Auto week rollover**: On first open of a new week, the previous week is automatically archived to History and exercises cleared — no manual action needed
+- **Toast notification**: "📦 Last week archived automatically" appears briefly after auto-rollover
+- **Start New Week moved to Settings → 🛠 Tools**: Available anytime for manual use (e.g. mid-week reset)
+- **Sunday reminder**: ↻ Start New Week button still appears on the main screen on Sundays only
+
 ## v3.6 — 2026-05-05
 - **Workout Builder**: New per-day custom exercise builder — select any exercises from any section for each day of the week. When Builder is active, the schedule is bypassed entirely.
 - **Workout Mode toggle**: Settings now shows a unified "📅 Workout Mode" section with a Schedule / Builder segmented control — one or the other, never both
