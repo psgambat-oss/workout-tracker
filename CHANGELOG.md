@@ -3,6 +3,13 @@
 ## v3.8 — 2026-04-20
 - **Finish confirmation**: Tapping Finish now shows a confirmation popup before marking the workout complete. If exercises are still unchecked, the popup shows how many remain so you can go back and finish them.
 
+## v3.7.1 — 2026-05-07
+- **Leg Presses**: Renamed "Machine incline seated x2/x1 leg" → "Machine w/ plates incline seated x2/x1 leg"; renamed "Machine reg seated" → "Machine seated"
+- **Glutes**: Renamed "Glute Back Press machine" → "Machine standing press back"
+- **Glutes**: Added Machine strapped in glute lift, Bench hip thrust, Bench hip thrust w/ weight, Bench Bulgarian split squat, Bench Bulgarian split squat w/ weight
+- **Migration fix**: "(5 - 10 min)" with spaces now stripped from Warm Up exercise labels
+- **Migration**: All renames and new exercises applied automatically to existing stored data
+
 ## v3.7 — 2026-05-07
 - **Auto week rollover**: On first open of a new week, the previous week is automatically archived to History and exercises cleared — no manual action needed
 - **Toast notification**: "📦 Last week archived automatically" appears briefly after auto-rollover
