@@ -1,5 +1,15 @@
 # Workout Tracker Changelog
 
+## v3.6 — 2026-05-05
+- **Workout Builder**: New per-day custom exercise builder — select any exercises from any section for each day of the week. When Builder is active, the schedule is bypassed entirely.
+- **Workout Mode toggle**: Settings now shows a unified "📅 Workout Mode" section with a Schedule / Builder segmented control — one or the other, never both
+- **Builder progress**: Done/total counts and section counts reflect only your builder-selected exercises when Builder is on
+- **Customize Days**: Tap to open the builder — day tabs M–S, checkbox per exercise, sections/subheaders auto-hide when empty
+- **Select All / Clear All**: Quickly select or clear all exercises for the current builder day
+- **Copy to →**: Copy the current day's builder selections to one or more other days
+- **Settings scroll**: Settings no longer jumps to top after each change — scroll position is preserved
+- **Help updated**: In-app Help and HELP.md updated to document Workout Mode (Schedule / Builder)
+
 ## v3.5.4 — 2026-05-05
 - **Delete protection**: ✕ delete button on sections and subheaders now only appears on user-created ones — built-in sections and subheaders can no longer be accidentally deleted
 - **Custom flag**: Newly added sections and subheaders are marked `custom: true` so they remain deletable

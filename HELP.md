@@ -68,9 +68,9 @@ Any day can include any combination of these sections, configured per-day in Set
 
 | Section | Description |
 |---------|-------------|
-| Warm Up/Cooldown | Cardio warm-up, Yoga, Static Stretching, Stretching Videos — all timed |
-| Cardio | Treadmill, Cycling, Rowing, Elliptical — all timed |
-| Abs + Core | TRX, Crunches, Leg Raises, BOSU, Ab Machines, Core Videos |
+| Warm Up/Cooldown | Cardio warm-up, Yoga (Dynamic/Static), Static Stretching — all timed |
+| Cardio | Treadmill, Cycling, Rowing, Elliptical, Freestyle — all timed |
+| Abs + Core | TRX, Crunches, Leg Raises, BOSU, Ab Machines |
 | Yoga | Active Standing Poses, Core Work, Deep Stretches — all timed |
 
 Warm Up appears first; Cardio, Abs + Core, and Yoga appear at the end of the workout.
@@ -79,12 +79,27 @@ Warm Up appears first; Cardio, Abs + Core, and Yoga appear at the end of the wor
 
 ## Settings (⚙︎ Gear Icon)
 
-### Workout Schedule
-The schedule uses a two-column layout with a single **STRENGTH | EXERCISE** header. For each day:
+### 📅 Workout Mode
+Settings opens with a **Schedule / Builder** toggle — you use one or the other, not both.
+
+#### Schedule
+The standard week schedule. Uses a two-column layout with a single **STRENGTH | EXERCISE** header. For each day:
 - **Left column (Strength)** — choose Upper Body, Legs, Full Body, or Rest
 - **Right column (Exercise)** — toggle optional sections: Warm Up/Cooldown, Abs + Core, Cardio, Yoga
 
 Tap **Save** to apply.
+
+#### Builder
+Build a fully custom workout for each day of the week. When Builder is selected, the schedule is bypassed entirely — only your chosen exercises appear in the workout view.
+
+- **✎ Customize Days →** — opens the builder to configure each day
+- In the builder, tap day tabs (M–S) to switch days
+- Check exercises to include them; uncheck to hide them
+- Sections and subheaders with no checked items are hidden automatically
+- **Select All / Clear All** — quickly check or uncheck all exercises for the current day
+- **Copy to →** — copy the current day's selections to one or more other days
+- The workout header shows **CUSTOM WORKOUT** and the progress count reflects only your selected exercises
+- Builder selections are saved and carry forward to the next week automatically
 
 ### Weekly Stats
 Controls the stats card (**This Week / Avg / Day / Streak**) displayed below the day tabs:

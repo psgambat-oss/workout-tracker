@@ -270,6 +270,40 @@
     .timed-icon { font-size: 11px; color: var(--dim); flex-shrink: 0; margin-left: 4px; opacity: 0.6; }
     .video-link-btn { background: none; border: none; font-size: 15px; cursor: pointer; padding: 0 2px; flex-shrink: 0; opacity: 0.8; line-height: 1; }
 
+    /* ── WORKOUT BUILDER ── */
+    .builder-modal { max-width: 480px; width: 96vw; max-height: 88vh; display: flex; flex-direction: column; padding: 0; border-radius: 16px; overflow: hidden; }
+    .builder-header { padding: 16px 16px 0; flex-shrink: 0; }
+    .builder-header h3 { margin: 0 0 12px; font-size: 17px; }
+    .builder-day-tabs { display: flex; gap: 5px; margin-bottom: 12px; }
+    .builder-day-tab { flex: 1; padding: 7px 4px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--dim); font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; }
+    .builder-day-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,0,0.1); }
+    .builder-body { flex: 1; overflow-y: auto; padding: 0 16px 8px; }
+    .builder-section { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .builder-sec-header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); cursor: pointer; }
+    .builder-sec-header:active { opacity: 0.7; }
+    .builder-sec-check { width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; font-weight: 700; }
+    .builder-sec-check.full { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .builder-sec-check.partial { background: rgba(255,107,0,0.15); border-color: var(--accent); color: var(--accent); }
+    .builder-sec-name { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; flex: 1; }
+    .builder-sec-count { font-size: 11px; color: var(--dim); }
+    .builder-sec-chevron { font-size: 11px; color: var(--dim); transition: transform 0.15s; }
+    .builder-sec-chevron.open { transform: rotate(180deg); }
+    .builder-sec-body { padding: 0 12px 8px; }
+    .builder-group { margin-top: 8px; }
+    .builder-group-label { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px 4px; }
+    .builder-group-check { width: 17px; height: 17px; border-radius: 4px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 700; }
+    .builder-group-check.full { background: rgba(48,209,88,0.85); border-color: var(--green); color: #fff; }
+    .builder-group-check.partial { background: rgba(48,209,88,0.15); border-color: var(--green); color: var(--green); }
+    .builder-group-name { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--dim); text-transform: uppercase; flex: 1; }
+    .builder-item { display: flex; align-items: center; gap: 10px; padding: 6px 4px 6px 26px; border-top: 1px solid rgba(255,255,255,0.04); }
+    .builder-item-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; font-weight: 700; cursor: pointer; }
+    .builder-item-check.on { background: var(--green); border-color: var(--green); color: #fff; }
+    .builder-item-label { font-size: 14px; flex: 1; line-height: 1.3; cursor: pointer; }
+    .builder-item-label.off { opacity: 0.35; text-decoration: line-through; }
+    .builder-footer { padding: 12px 16px; flex-shrink: 0; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .builder-select-all { font-size: 11px; font-weight: 700; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; }
+    .builder-clear-all { font-size: 11px; font-weight: 700; color: var(--dim); background: none; border: none; cursor: pointer; padding: 0; }
+
     /* ── DAY BADGES ── */
     .day-badges { display: flex; gap: 3px; flex-shrink: 0; }
 
@@ -896,7 +930,7 @@ const KEY_VER    = 'wl26_ver';
 const KEY_NOTES  = 'wl26_notes';
 const KEY_HIDDEN = 'wl26_hidden';
 
-const APP_VERSION = '3.5.3';
+const APP_VERSION = '3.6';
 
 // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 function makeDayCfg(type, opts={}) {
@@ -914,6 +948,9 @@ const DEFAULT_SCHEDULE = {
 
 let statsMode        = 'off'; // 'off' | 'auto' | 'always'
 let autoExport       = false;
+let builderMode      = false; // workout builder toggle
+let builderSelections = {}; // { dayKey: { itemId: true } } — selected exercises per day
+let builderDay       = null; // currently viewed day in builder modal
 let trainerNotes     = { enabled: false, notes: [] }; // { header, body }[]
 let hiddenExercises  = {}; // { itemId: true }
 let schedule         = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
@@ -949,9 +986,49 @@ function saveSchedule()      { localStorage.setItem(KEY_SCHED, JSON.stringify(sc
 function saveHidden()        { localStorage.setItem(KEY_HIDDEN, JSON.stringify(hiddenExercises)); }
 function toggleHidden(id)    { hiddenExercises[id] = !hiddenExercises[id]; if (!hiddenExercises[id]) delete hiddenExercises[id]; saveHidden(); render(); }
 function saveHistory()       { localStorage.setItem(KEY_HIST,  JSON.stringify(workoutHistory)); }
-function savePrefs()        { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode, autoExport })); }
+function savePrefs()        { localStorage.setItem(KEY_PREFS, JSON.stringify({ statsMode, autoExport, builderMode, builderSelections })); }
 function setStatsMode(mode) { statsMode = mode; savePrefs(); render(); }
 function toggleAutoExport() { autoExport = !autoExport; savePrefs(); render(); }
+function toggleBuilderMode() { builderMode = !builderMode; savePrefs(); render(); }
+function openWorkoutBuilder() {
+  builderDay = builderDay || dateKey(currentDate);
+  modal = { type: 'workoutBuilder' };
+  render();
+}
+function builderSwitchDay(dk) { builderDay = dk; render(); }
+function builderToggleItem(dk, itemId) {
+  if (!builderSelections[dk]) builderSelections[dk] = {};
+  if (builderSelections[dk][itemId]) delete builderSelections[dk][itemId];
+  else builderSelections[dk][itemId] = true;
+  render();
+}
+function builderSelectAll(dk, ids) {
+  if (!builderSelections[dk]) builderSelections[dk] = {};
+  ids.forEach(id => builderSelections[dk][id] = true);
+  render();
+}
+function builderClearAll(dk, ids) {
+  if (!builderSelections[dk]) builderSelections[dk] = {};
+  ids.forEach(id => delete builderSelections[dk][id]);
+  render();
+}
+function builderToggleSection(secId) {
+  const el = document.getElementById('bld-body-' + secId);
+  const ch = document.getElementById('bld-chev-' + secId);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+  if (ch) ch.classList.toggle('open');
+}
+function openBuilderCopyModal() {
+  modal = { type: 'builderCopy', srcDay: builderDay || dateKey(currentDate) };
+  render();
+}
+function doBuilderCopy(targetDays) {
+  const src = builderSelections[modal.srcDay] || {};
+  targetDays.forEach(dk => { builderSelections[dk] = Object.assign({}, src); });
+  savePrefs();
+  modal = { type: 'workoutBuilder' };
+  render();
+}
 
 function getDefaultDate() {
   const d = new Date();
@@ -967,7 +1044,7 @@ function loadState() {
   try { collapsed       = JSON.parse(localStorage.getItem(KEY_COL))  || {}; } catch(e) { collapsed = {}; }
   try { completedDays   = JSON.parse(localStorage.getItem(KEY_DONE)) || {}; } catch(e) { completedDays = {}; }
   try { workoutHistory  = JSON.parse(localStorage.getItem(KEY_HIST)) || []; } catch(e) { workoutHistory = []; }
-  try { const p = localStorage.getItem(KEY_PREFS); if (p) { const prefs = JSON.parse(p); statsMode = prefs.statsMode || 'off'; autoExport = !!prefs.autoExport; } } catch(e) {}
+  try { const p = localStorage.getItem(KEY_PREFS); if (p) { const prefs = JSON.parse(p); statsMode = prefs.statsMode || 'off'; autoExport = !!prefs.autoExport; builderMode = !!prefs.builderMode; builderSelections = prefs.builderSelections || {}; } } catch(e) {}
   try { const r = localStorage.getItem(KEY_EX);    if (r) customExercises = JSON.parse(r); } catch(e) {}
   try { const n = localStorage.getItem(KEY_NOTES); if (n) trainerNotes  = JSON.parse(n); } catch(e) {}
   try { const h = localStorage.getItem(KEY_HIDDEN); if (h) hiddenExercises = JSON.parse(h); } catch(e) {}
@@ -1229,12 +1306,14 @@ function getExercisesForType(type, cfg) {
 }
 
 function getProgress(type, d) {
-  const ds = getDayState(d);
+  const ds  = getDayState(d);
+  const sel = builderMode ? (builderSelections[dateKey(d)] || {}) : null;
   let total = 0, done = 0;
-  getExercisesForType(type, getDayCfg(d)).forEach(sec =>
+  getAllSections().forEach(sec =>
     sec.groups.forEach(g =>
       g.items.forEach(item => {
         if (hiddenExercises[item.id]) return;
+        if (sel && !sel[item.id]) return; // builder filter
         total++; if (ds.checked[item.id]) done++;
       })
     )
@@ -1244,13 +1323,31 @@ function getProgress(type, d) {
 
 function getSectionProgress(secId, type, d) {
   const ds  = getDayState(d);
-  const sec = getExercisesForType(type, getDayCfg(currentDate)).find(s => s.id === secId);
+  const sel = builderMode ? (builderSelections[dateKey(d)] || {}) : null;
+  const sec = getAllSections().find(s => s.id === secId);
   if (!sec) return { done: 0, total: 0 };
   let total = 0, done = 0;
   sec.groups.forEach(g =>
-    g.items.forEach(item => { total++; if (ds.checked[item.id]) done++; })
+    g.items.forEach(item => {
+      if (sel && !sel[item.id]) return; // builder filter
+      total++; if (ds.checked[item.id]) done++;
+    })
   );
   return { done, total };
+}
+
+// Returns every section from all workout types + shared — used by builder mode
+function getAllSections() {
+  const ex = getExercises();
+  const shared = ex['shared'] || [];
+  return [
+    ...shared.filter(s => s.id === 'warmup'),
+    ...(ex['fullBody']  || []),
+    ...(ex['legsCore']  || []),
+    ...shared.filter(s => s.id === 'cardio'),
+    ...shared.filter(s => s.id === 'core'),
+    ...shared.filter(s => s.id === 'yoga'),
+  ];
 }
 
 function getStreak() {
@@ -1895,6 +1992,8 @@ function renderExercise(item, ds, workoutType, sectionId, gIdx, iIdx) {
 
 function renderSection(sec, type, idx) {
   const ds          = getDayState(currentDate);
+  const dk          = dateKey(currentDate);
+  const sel         = builderMode ? (builderSelections[dk] || {}) : null; // null = builder off
   const isCollapsed = collapsed[sec.id] !== false;
   const { done, total } = getSectionProgress(sec.id, type, currentDate);
   const complete    = done === total && total > 0;
@@ -1907,6 +2006,9 @@ function renderSection(sec, type, idx) {
   if (!isCollapsed) {
     const trainerNoteHtml = renderSectionTrainerNotes(sec.id);
     const groupsHtml = sec.groups.map((g, gIdx) => {
+      // In builder mode, filter items to only selected ones
+      const visibleItems = sel ? g.items.filter(item => sel[item.id]) : g.items;
+      if (sel && visibleItems.length === 0) return ''; // skip empty groups in builder mode
       const grpLabel = g.name
         ? `<div class="group-label" style="${editMode ? 'display:flex;align-items:center;gap:6px;padding-right:8px' : ''}">
             ${editMode ? `<span class="drag-handle" style="font-size:15px" ontouchstart="startGroupDrag(event,'${type}','${sec.id}',${gIdx})" onmousedown="startGroupDrag(event,'${type}','${sec.id}',${gIdx})">≡</span>` : ''}
@@ -1914,7 +2016,7 @@ function renderSection(sec, type, idx) {
             ${editMode && g.custom ? `<button class="delete-btn" style="width:20px;height:20px;font-size:11px;flex-shrink:0" onclick="deleteGroup('${type}','${sec.id}',${gIdx})">✕</button>` : ''}
            </div>`
         : '';
-      const items  = g.items.map((item, iIdx) => renderExercise(item, ds, type, sec.id, gIdx, iIdx)).join('');
+      const items  = visibleItems.map((item, iIdx) => renderExercise(item, ds, type, sec.id, gIdx, iIdx)).join('');
       const addBtn = editMode
         ? `<button class="add-exercise-btn" onclick="openAddModal('${type}','${sec.id}',${esc(JSON.stringify(g.name))})">＋ Add to ${g.name || sec.name}</button>`
         : '';
@@ -2261,10 +2363,10 @@ function renderModal() {
         <div style="font-size:16px;line-height:1.7;margin-bottom:18px">
           <p style="margin-bottom:10px">Here's what's new:</p>
           <ul style="padding-left:18px;margin:0;color:var(--dim)">
-            <li>Reorder sections, subheaders &amp; exercises by dragging ≡</li>
-            <li>Move an exercise to any section via ⇄</li>
-            <li>Delete sections and subheaders with ✕</li>
-            <li>Rest day now links directly to Settings</li>
+            <li>New <strong>Workout Builder</strong> — build a fully custom workout for each day</li>
+            <li>Schedule or Builder — choose one in Settings → 📅 Workout Mode</li>
+            <li>Select exercises from any section; sections with nothing checked are hidden</li>
+            <li>Copy a day's selections to other days with <strong>Copy to →</strong></li>
           </ul>
         </div>
         <p style="font-size:15px;color:var(--dim);margin-bottom:18px">Start by tapping today's day tab at the top, then check off exercises as you go. Tap <strong>Finish</strong> when done.</p>
@@ -2297,8 +2399,16 @@ function renderModal() {
         </div>
 
         <div class="help-section">
-          <div class="help-section-hdr">Settings ⚙︎</div>
-          <div class="help-row"><span class="help-key">Schedule</span><span class="help-val">Two-column layout: Strength (Upper Body / Legs / Full Body / Rest) on the left, optional sections (Warm Up/Cooldown / Abs + Core / Cardio / Yoga) on the right</span></div>
+          <div class="help-section-hdr">Settings ⚙︎ — Workout Mode</div>
+          <div class="help-row"><span class="help-key">Schedule</span><span class="help-val">Standard week schedule — set each day to Upper Body, Legs, Full Body, or Rest, and toggle optional sections (Warm Up/Cooldown, Cardio, Abs + Core, Yoga) per day</span></div>
+          <div class="help-row"><span class="help-key">Builder</span><span class="help-val">Build a fully custom workout for each day. When Builder is on, the schedule is bypassed — only your selected exercises appear. Progress counts reflect your selections only.</span></div>
+          <div class="help-row"><span class="help-key">✎ Customize Days</span><span class="help-val">Opens the builder. Tap day tabs (M–S) to switch days, check exercises to include them. Sections and subheaders with no checked items are hidden automatically.</span></div>
+          <div class="help-row"><span class="help-key">Select All / Clear All</span><span class="help-val">Quickly check or uncheck all exercises for the current day in the builder</span></div>
+          <div class="help-row"><span class="help-key">Copy to →</span><span class="help-val">Copy the current day's selections to one or more other days</span></div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-hdr">Settings ⚙︎ — Other</div>
           <div class="help-row"><span class="help-key">Weekly Stats</span><span class="help-val">Off / After Finish / Always — shows This Week, Avg / Day (exercises), and Streak</span></div>
           <div class="help-row"><span class="help-key">Trainer Notes</span><span class="help-val">Tap ✎ Manage Notes to add personal reminders shown on your workout screen</span></div>
           <div class="help-row"><span class="help-key">Edit Exercises</span><span class="help-val">Add, rename, reorder, hide, or delete exercises, sections, and subheaders</span></div>
@@ -2364,14 +2474,21 @@ function renderModal() {
           <h3>⚙︎ Settings</h3>
 
           <div class="settings-section">
-            <div class="settings-section-hdr">📅 Workout Schedule</div>
-            <div class="sched-header">
-              <span class="sched-hdr-day">DAY</span>
-              <span class="sched-hdr-col">STRENGTH</span>
-              <span class="sched-hdr-div"></span>
-              <span class="sched-hdr-col">EXERCISE</span>
+            <div class="settings-section-hdr">📅 Workout Mode</div>
+            <div class="settings-seg" style="margin-bottom:14px">
+              <span onclick="if(builderMode){toggleBuilderMode()}" style="${!builderMode?'background:rgba(255,107,0,0.2);color:var(--accent)':'color:var(--dim)'}">Schedule</span>
+              <span onclick="if(!builderMode){toggleBuilderMode()}" style="${builderMode?'background:rgba(255,107,0,0.2);color:var(--accent)':'color:var(--dim)'}">Builder</span>
             </div>
-            <div class="sched-list">${rows}</div>
+            ${builderMode
+              ? `<button class="modal-btn cancel" style="width:100%" onclick="openWorkoutBuilder()">✎ Customize Days →</button>`
+              : `<div class="sched-header">
+                  <span class="sched-hdr-day">DAY</span>
+                  <span class="sched-hdr-col">STRENGTH</span>
+                  <span class="sched-hdr-div"></span>
+                  <span class="sched-hdr-col">EXERCISE</span>
+                </div>
+                <div class="sched-list">${rows}</div>`
+            }
           </div>
 
           <div class="settings-section">
@@ -2423,6 +2540,109 @@ function renderModal() {
         <div class="modal-actions">
           <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
           <button class="modal-btn confirm" onclick="saveSettings()">Save</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'workoutBuilder') {
+    const dk = builderDay || dateKey(currentDate);
+    const sel = builderSelections[dk] || {};
+    const weekDays = getWeekDays(currentDate);
+    const dayTabs = weekDays.map((d, i) => {
+      const k = dateKey(d);
+      const active = k === dk;
+      return `<button class="builder-day-tab${active ? ' active' : ''}" onclick="builderSwitchDay('${k}')">${DAY_LETTERS[i]}</button>`;
+    }).join('');
+
+    // Builder always shows ALL sections across all types — schedule is bypassed
+    const sections = getAllSections();
+
+    let allIds = [];
+    const sectionsHtml = sections.map(sec => {
+      const secIds = [];
+      const groupsHtml = sec.groups.map(g => {
+        const itemsHtml = g.items.map(item => {
+          const on = !!sel[item.id];
+          secIds.push(item.id);
+          allIds.push(item.id);
+          return `<div class="builder-item" onclick="builderToggleItem('${dk}','${item.id}')">
+            <div class="builder-item-check${on ? ' on' : ''}">${on ? '✓' : ''}</div>
+            <span class="builder-item-label${on ? '' : ' off'}">${esc(item.label)}</span>
+          </div>`;
+        }).join('');
+        const groupChecked = g.items.filter(i => sel[i.id]).length;
+        const groupTotal   = g.items.length;
+        const gCls = groupChecked === 0 ? '' : groupChecked === groupTotal ? ' full' : ' partial';
+        const gLabel = g.name ? `<div class="builder-group-label" onclick="event.stopPropagation()">
+          <div class="builder-group-check${gCls}">${gCls === ' full' ? '✓' : gCls === ' partial' ? '–' : ''}</div>
+          <span class="builder-group-name">${esc(g.name)}</span>
+        </div>` : '';
+        return `<div class="builder-group">${gLabel}${itemsHtml}</div>`;
+      }).join('');
+
+      const secChecked = secIds.filter(id => sel[id]).length;
+      const secTotal   = secIds.length;
+      const sCls = secChecked === 0 ? '' : secChecked === secTotal ? ' full' : ' partial';
+      const secIdSafe = sec.id.replace(/[^a-z0-9]/gi, '_');
+
+      return `<div class="builder-section">
+        <div class="builder-sec-header" onclick="builderToggleSection('${secIdSafe}')">
+          <div class="builder-sec-check${sCls}">${sCls === ' full' ? '✓' : sCls === ' partial' ? '–' : ''}</div>
+          <span class="builder-sec-name">${esc(sec.name)}</span>
+          <span class="builder-sec-count">${secChecked}/${secTotal}</span>
+          <span class="builder-sec-chevron open" id="bld-chev-${secIdSafe}">▾</span>
+        </div>
+        <div class="builder-sec-body" id="bld-body-${secIdSafe}">${groupsHtml}</div>
+      </div>`;
+    }).join('');
+
+    const selectedCount = allIds.filter(id => sel[id]).length;
+
+    return `<div class="modal-overlay" onclick="closeModal()" style="align-items:flex-end;padding:0">
+      <div class="modal builder-modal" onclick="event.stopPropagation()">
+        <div class="builder-header">
+          <h3>🏗 Workout Builder</h3>
+          <div class="builder-day-tabs">${dayTabs}</div>
+        </div>
+        <div class="builder-body">
+          ${sections.length === 0
+            ? `<p style="color:var(--dim);font-size:14px;text-align:center;padding:32px 0">Rest day — no exercises to configure.</p>`
+            : sectionsHtml}
+        </div>
+        <div class="builder-footer">
+          <button class="builder-select-all" onclick="builderSelectAll('${dk}',[${allIds.map(id=>`'${id}'`).join(',')}])">Select All</button>
+          <button class="builder-clear-all" onclick="builderClearAll('${dk}',[${allIds.map(id=>`'${id}'`).join(',')}])">Clear All</button>
+          <button class="builder-select-all" style="margin-left:6px" onclick="openBuilderCopyModal()">Copy to →</button>
+          <span style="flex:1"></span>
+          <span style="font-size:12px;color:var(--dim)">${selectedCount} of ${allIds.length} selected</span>
+          <button class="modal-btn confirm" style="margin-left:10px;padding:8px 18px;font-size:13px" onclick="closeModal()">Done</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  if (modal.type === 'builderCopy') {
+    const weekDays = getWeekDays(currentDate);
+    const srcLabel = DAY_LETTERS[weekDays.findIndex(d => dateKey(d) === modal.srcDay)];
+    const otherDays = weekDays.filter(d => dateKey(d) !== modal.srcDay);
+    const dayChecks = otherDays.map(d => {
+      const k = dateKey(d);
+      const letter = DAY_LETTERS[weekDays.indexOf(d)];
+      const cfg = schedule[d.getDay()] || makeDayCfg(null);
+      const isRest = !cfg.type;
+      return `<label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);cursor:${isRest?'default':'pointer'};opacity:${isRest?'0.35':'1'}">
+        <input type="checkbox" id="copy-day-${k}" value="${k}" ${isRest?'disabled':''} style="width:18px;height:18px;accent-color:var(--accent)">
+        <span style="font-size:15px;font-weight:700">${letter}</span>
+        <span style="font-size:13px;color:var(--dim)">${cfg.type ? cfg.type.replace('fullBody','Upper Body').replace('legs','Legs') : 'Rest'}</span>
+      </label>`;
+    }).join('');
+    return `<div class="modal-overlay centered" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3>Copy ${srcLabel}'s selections to…</h3>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:8px">Overwrites the target day's current selections.</p>
+        <div style="margin-bottom:16px">${dayChecks}</div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="modal={type:'workoutBuilder'};render()">Back</button>
+          <button class="modal-btn confirm" onclick="doBuilderCopy([...document.querySelectorAll('[id^=copy-day-]:checked')].map(el=>el.value))">Copy</button>
         </div>
       </div>
     </div>`;
@@ -2490,12 +2710,17 @@ function renderStatsCard() {
   </div>`;
 }
 
+let _settingsScroll = 0; // preserve Settings scroll position across renders
 function render() {
+  // Save settings scroll position before rebuilding DOM
+  const _scrollEl = document.querySelector('.sched-modal-body');
+  if (_scrollEl) _settingsScroll = _scrollEl.scrollTop;
+
   const cfg  = getDayCfg(currentDate);
   const type = cfg.type;
 
-  const isDone  = type ? !!completedDays[dateKey(currentDate)] : false;
-  const editBtn = type
+  const isDone  = (type || builderMode) ? !!completedDays[dateKey(currentDate)] : false;
+  const editBtn = (type || builderMode)
     ? (editMode
         ? `<button class="edit-toggle active" onclick="toggleEditMode()">Done</button>`
         : isDone
@@ -2504,11 +2729,12 @@ function render() {
     : '';
 
   let headerMeta = '';
-  if (type) {
+  if (type || builderMode) {
     const { done, total } = getProgress(type, currentDate);
     const pct   = total ? Math.round((done / total) * 100) : 0;
-    const label = type === 'fullBody' ? 'UPPER BODY' : type === 'legs' ? 'LEGS' : type === 'combined' ? 'FULL BODY' : '';
-    const days  = getScheduledDaysLabel(type);
+    const label = builderMode ? 'CUSTOM WORKOUT'
+      : type === 'fullBody' ? 'UPPER BODY' : type === 'legs' ? 'LEGS' : type === 'combined' ? 'FULL BODY' : '';
+    const days  = builderMode ? 'Workout Builder' : getScheduledDaysLabel(type);
     headerMeta = `
     <div class="workout-meta">
       <div>
@@ -2529,7 +2755,7 @@ function render() {
   }
 
   let content;
-  if (type) {
+  if (type || builderMode) {
     const ex = getExercises();
     const shared = ex['shared'] || [];
     const sharedById = id => shared.filter(s => s.id === id);
@@ -2539,17 +2765,33 @@ function render() {
     else if (type === 'legs') mainSecs = ex['legsCore'] || [];
     else mainSecs = ex[type] || [];
 
-    const sections = [
+    const dk = dateKey(currentDate);
+    const sel = builderMode ? (builderSelections[dk] || {}) : null;
+
+    // In builder mode, draw from ALL sections across all types (schedule is bypassed)
+    const allSec = getAllSections();
+    const scheduledSections = [
       ...(cfg.warmup ? sharedById('warmup') : []),
       ...mainSecs,
       ...(cfg.cardio ? sharedById('cardio') : []),
       ...(cfg.core   ? sharedById('core')   : []),
       ...(cfg.yoga   ? sharedById('yoga')   : []),
     ];
-    content = sections.map((s, i) => {
-      const srcType = ['warmup','cardio','core','yoga'].includes(s.id) ? 'shared' : (type === 'legs' ? 'legsCore' : type);
-      return renderSection(s, srcType, i);
-    }).join('') + (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '');
+    const sections = sel ? allSec : scheduledSections;
+
+    const visibleSections = sel
+      ? sections.filter(s => s.groups.some(g => g.items.some(item => sel[item.id])))
+      : sections;
+    content = (visibleSections.length === 0 && builderMode
+      ? `<div class="rest-day"><div class="rest-icon">🏗</div><div class="rest-title">No exercises selected</div><div class="rest-sub">Open <button class="rest-settings-link" onclick="openWorkoutBuilder()">Workout Builder</button> to pick your exercises for today.</div></div>`
+      : visibleSections.map((s, i) => {
+          const sharedIds = ['warmup','cardio','core','yoga'];
+          const srcType = sharedIds.includes(s.id) ? 'shared'
+            : (ex['legsCore'] || []).some(ls => ls.id === s.id) ? 'legsCore'
+            : 'fullBody';
+          return renderSection(s, srcType, i);
+        }).join('')
+    ) + (editMode ? `<button class="add-section-btn" onclick="openAddSectionModal('${type}')">＋ Add Section</button>` : '');
   } else {
     const isToday = dateKey(currentDate) === dateKey(new Date());
     content = `<div class="rest-day">
@@ -2585,6 +2827,13 @@ function render() {
     </div>
     ${renderModal()}
   `;
+  // Restore Settings scroll position after DOM rebuild (two rAF frames for full layout)
+  if (_settingsScroll > 0) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const _el = document.querySelector('.sched-modal-body');
+      if (_el) _el.scrollTop = _settingsScroll;
+    }));
+  }
 }
 
 // ─────────────────────────────────────────────
