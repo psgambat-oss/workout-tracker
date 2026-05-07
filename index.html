@@ -1223,9 +1223,14 @@ function migrateExercises() {
     // Remove STRETCHING VIDEOS group if present (removed from defaults in v3.5.3)
     const svIdx = sharedWarmup.groups.findIndex(g => g.name === 'STRETCHING VIDEOS');
     if (svIdx !== -1) { sharedWarmup.groups.splice(svIdx, 1); dirty = true; }
-    // Remove "(5-10 min)" from any labels & fix "Warmup" → "Warm Up"
+    // Fix section name (old stored data may say "COOL DOWN" as two words)
+    if (sharedWarmup.name !== 'WARM UP / COOLDOWN') { sharedWarmup.name = 'WARM UP / COOLDOWN'; dirty = true; }
+    // Fix wu1/wu2 labels directly by ID — guaranteed regardless of stored format
     sharedWarmup.groups.forEach(g => g.items.forEach(item => {
-      const fixed = item.label.replace(/\s*\(5\s*-\s*10 min\)/gi, '').replace(/\bWarmup\b/g, 'Warm Up');
+      if (item.id === 'wu1') { item.label = 'Treadmill Warm Up Walk';  item.timed = true; dirty = true; }
+      if (item.id === 'wu2') { item.label = 'Treadmill Cooldown Walk'; item.timed = true; dirty = true; }
+      // Also strip any "(X-Y min)" pattern from any other warmup labels
+      const fixed = item.label.replace(/\s*\(\d+\s*[-–]\s*\d+\s*min\)/gi, '').replace(/\bWarmup\b/g, 'Warm Up');
       if (fixed !== item.label) { item.label = fixed; dirty = true; }
       item.timed = true;
     }));
