@@ -958,7 +958,13 @@ const KEY_NOTES  = 'wl26_notes';
 const KEY_HIDDEN = 'wl26_hidden';
 const KEY_WEEK   = 'wl26_week';   // stores last known Monday date string for auto-rollover
 
-const APP_VERSION = '3.6.1';
+const APP_VERSION = '3.6.2';
+const DEPLOY_KEY = 'wl26_deploy';
+const DEPLOY_VERSION = '20260512-1';
+if (localStorage.getItem(DEPLOY_KEY) !== DEPLOY_VERSION) {
+  localStorage.setItem(DEPLOY_KEY, DEPLOY_VERSION);
+  window.location.reload(true);
+}
 
 // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 function makeDayCfg(type, opts={}) {
