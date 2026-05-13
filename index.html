@@ -1284,6 +1284,14 @@ function migrateExercises() {
       if (item.id === 'lg3'  && item.label === 'Machine reg x2 leg') { item.label = 'Machine seated x2 leg'; dirty = true; }
       if (item.id === 'lg4'  && item.label === 'Machine reg seated x1 leg') { item.label = 'Machine seated x1 leg'; dirty = true; }
       if (item.id === 'lg14' && item.label === 'Glute Back Press machine') { item.label = 'Machine standing press back'; dirty = true; }
+      if (item.id === 'tr4'  && item.label === 'Barbell skull crushers') { item.label = 'Tricep Extension (skull crushers) flat'; dirty = true; }
+      if (item.id === 'tr4'  && item.label === 'Lying Tricep Extension (skull crushers) flat') { item.label = 'Tricep Extension (skull crushers) flat'; dirty = true; }
+      if (item.id === 'tr11' && item.label === 'Lying Tricep Extension (skull crushers) incline') { item.label = 'Tricep Extension (skull crushers) incline'; dirty = true; }
+      if (item.id === 'lg10' && item.label === 'Tapbar Deadlift') { item.label = 'Trap Bar Deadlift'; dirty = true; }
+      if (item.id === 'c13'  && item.label === 'Machine flat wide grip') { item.label = 'Machine w/ plates flat wide grip'; dirty = true; }
+      if (item.id === 'c14'  && item.label === 'Machine flat close grip') { item.label = 'Machine w/ plates flat close grip'; dirty = true; }
+      if (item.id === 'c16'  && item.label === 'Seated pec deck') { item.label = 'Chest Fly Machine (pec deck)'; dirty = true; }
+      if (item.id === 'co4'  && item.label === 'Bench decline #1 (x50–75)') { item.label = 'Bench decline'; dirty = true; }
     })));
   };
   fixLabels(customExercises.shared);
