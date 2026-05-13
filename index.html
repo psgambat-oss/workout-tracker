@@ -1338,12 +1338,13 @@ function migrateExercises() {
         { id: 'tr10', label: 'Barbell close grip flat' },
         { id: 'tr12', label: 'Barbell close grip incline' },
       ];
-      // Insert after tr4 if not already present
-      const tr4Idx = presses.items.findIndex(i => i.id === 'tr4');
+      // Insert after tr4 in order, tracking position as we go
+      let insertAt = presses.items.findIndex(i => i.id === 'tr4');
+      insertAt = insertAt !== -1 ? insertAt + 1 : presses.items.length;
       tricepAdd.forEach(ex => {
         if (!presses.items.find(i => i.id === ex.id)) {
-          const insertAt = tr4Idx !== -1 ? tr4Idx + 1 : presses.items.length;
           presses.items.splice(insertAt, 0, ex);
+          insertAt++;
           dirty = true;
         }
       });
